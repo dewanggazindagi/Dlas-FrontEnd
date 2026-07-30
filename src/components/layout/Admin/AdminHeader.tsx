@@ -28,7 +28,7 @@ const NAV_ITEMS = [
 
 export default function AdminHeader() {
   return (
-    <header className="h-22.5 px-10">
+    <header className="h-22.5 w-full px-10 fixed z-100 bg-white">
       <div className="mx-auto h-full flex items-center justify-between">
         <img src={logo} alt="D'Las Logo" className="h-22.5" />
 
@@ -66,7 +66,7 @@ export default function AdminHeader() {
 
           <Button
             variant="outline"
-            className="p-3.5 hover:bg-danger-soft"
+            className="p-3.5 hover:bg-danger-soft border-border"
             size="undefined"
           >
             <LogOut size={18} className="text-danger" />

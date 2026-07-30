@@ -1,22 +1,27 @@
 import AdminLayout from "../../components/layout/Admin/AdminLayout";
-import Button from "../../components/ui/Button";
-import Typography from "../../components/ui/Typography";
-import { ArrowUpRight } from "lucide-react";
+
+import BarChart from "../../components/charts/BarChart";
+import { dashboardData } from "../../services/data/dashboardData";
+import { topTicketData } from "../../services/data/topTicketData";
 
 export default function Dashboard() {
   return (
     <AdminLayout>
-      <div>
-      <Typography variant="h1" weight="bold">
-        Selamat Datang
-      </Typography>
-      <p>
-        Welcome to the admin dashboard!{" "}
-        <Button size="sm" endIcon={<ArrowUpRight size={20} />}>
-          Lihat Semua
-        </Button>
-      </p>
-    </div>
+      <div className="grid grid-rows p-10 gap-6">
+        <BarChart
+          title="Statistik Transaksi"
+          data={dashboardData}
+          xKey="month"
+          yKey="value"
+        />
+        <BarChart
+          title="Penjualan Terbanyak"
+          data={topTicketData}
+          xKey="ticket"
+          yKey="value"
+          color="#FCB212"
+        />
+      </div>
     </AdminLayout>
   );
 }

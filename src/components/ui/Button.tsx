@@ -34,7 +34,7 @@ const Button = ({
     primary:
       "bg-primary text-white hover:bg-primary-hover disabled:bg--primary-soft disabled:text-white",
     outline:
-      "border border-border bg-white text--primary hover:bg--primary-soft",
+      "border bg-white text--primary hover:bg--primary-soft",
     danger: "bg-danger text-white hover:bg-danger-soft",
   };
 
