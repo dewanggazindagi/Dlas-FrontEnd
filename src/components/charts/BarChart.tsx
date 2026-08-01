@@ -60,7 +60,6 @@ export default function BarChart<T extends Record<string, unknown>>({
             fill={color}
             radius={12}
             maxBarSize={maxBarSize}
-            activeBar={false}
           />
         </RechartsBarChart>
       </ResponsiveContainer>
