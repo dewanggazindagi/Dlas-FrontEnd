@@ -39,10 +39,10 @@ export default function BarChart<T extends Record<string, unknown>>({
     <div className="rounded-xl bg-white">
       {title && <h2 className="mb-4 text-lg font-semibold">{title}</h2>}
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsBarChart data={data}>
+        <RechartsBarChart data={data} className="font-regular text-dark-gray text-sm">
           {showGrid && <CartesianGrid vertical={false} stroke="#ECECEC" />}
           {showXAxis && (
-            <XAxis dataKey={xKey as string} axisLine={false} tickLine={false} />
+            <XAxis dataKey={xKey as string} axisLine={false} tickLine={false}/>
           )}
           {showYAxis && (
             <YAxis

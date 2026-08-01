@@ -52,7 +52,7 @@ export default function AdminTable({ data }: AdminTable) {
   });
 
   const { currentData, currentPage, totalPages, setCurrentPage } =
-    usePagination(sortedData, 2);
+    usePagination(sortedData, 5);
   useEffect(() => {
     setCurrentPage(1);
   }, [searchValue, sortBy, setCurrentPage]);

@@ -32,7 +32,7 @@ export default function BaseTable<T extends Record<string, unknown>>({
                 <th
                   key={String(column.key)}
                   style={{ width: column.width }}
-                  className={`border-b border-gray-100 bg-gray-50 px-6 py-4 text-sm font-medium text-gray-500 ${align(
+                  className={`border-b border-gray-100 bg-white px-6 py-4 text-sm font-medium text-gray-500 ${align(
                     column.align,
                   )}`}
                 >
@@ -57,7 +57,7 @@ export default function BaseTable<T extends Record<string, unknown>>({
                   {columns.map((column) => (
                     <td
                       key={String(column.key)}
-                      className={`border-b border-gray-100 px-6 py-5 text-sm text-gray-800 ${align(
+                      className={`border-b border-gray-100 px-6 py-5 text-sm text-black ${align(
                         column.align,
                       )}`}
                     >
