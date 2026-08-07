@@ -46,7 +46,7 @@ export default function Dropdown({
       <button
         onClick={() => setOpen(!open)}
         className="
-          flex items-center text-sm gap-1.75 w-full max-w-md rounded-full border border-border bg-white pl-4 pr-3.5 h-11
+          flex items-center text-sm gap-1.75 w-full max-w-md rounded-full border border-border bg-white pl-4 pr-3.5 h-11 shadow-md
         "
       >
         {trigger ?? (

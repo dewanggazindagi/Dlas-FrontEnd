@@ -5,9 +5,15 @@ interface Props {
   options: DropdownOption[];
   value: string;
   onChange: (value: string) => void;
+  showPrefix?: boolean;
 }
 
-export default function TableFilter({ options, value, onChange }: Props) {
+export default function TableFilter({
+  options,
+  value,
+  onChange,
+  showPrefix = true,
+}: Props) {
   const selected = options.find((o) => o.value === value);
 
   return (
@@ -18,7 +24,9 @@ export default function TableFilter({ options, value, onChange }: Props) {
       trigger={
         <>
           <List size={18} />
-          <span className="font-semibold">Urutkan :</span>
+
+          {showPrefix && <span className="font-semibold">Urutkan :</span>}
+
           <span className="font-semibold">{selected?.label}</span>
         </>
       }

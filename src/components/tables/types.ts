@@ -5,6 +5,7 @@ export interface TableColumn<T> {
   header: string;
   width?: string;
   align?: "left" | "center" | "right";
+
   render?: (row: T) => ReactNode;
 }
 

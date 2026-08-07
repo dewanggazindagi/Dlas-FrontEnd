@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import AdminHeader from "./AdminHeader";
-import Footer from "./AdminFooter";
+import AdminFooter from "./AdminFooter";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -9,10 +9,10 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <AdminHeader />
-      <main className="z-0 mt-22.5">{children}</main>
-      <Footer />
+      <main className="flex-1 pt-22.5">{children}</main>
+      <AdminFooter />
     </div>
   );
 }

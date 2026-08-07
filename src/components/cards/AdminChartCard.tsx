@@ -1,20 +1,32 @@
 import BarChart from "../../components/charts/BarChart";
-import { dashboardData } from "../../services/data/dashboardData";
-import { topTicketData } from "../../services/data/topTicketData";
+import type { Transaction } from "../../types/transaction";
 
-export default function AdminChartCard() {
+import {
+  transactionToBarChart,
+  transactionToTopTicket,
+} from "../../utils/chart";
+
+interface Props {
+  data: Transaction[];
+}
+
+export default function AdminChartCard({ data }: Props) {
+  const dashboardData = transactionToBarChart(data);
+
+  const topTicketData = transactionToTopTicket(data);
+
   return (
     <div>
-      <h6 className="text-dark-gray text-md font-medium mb-2">
-        Tiket Terjual 1 tahun
-      </h6>
-      <div className="gap-7 grid">
+      <h6 className="mb-2 text-md font-medium text-dark-gray">Tiket Terjual</h6>
+
+      <div className="grid gap-7">
         <BarChart
-          title="32.901 Tiket"
+          title="Statistik Penjualan"
           data={dashboardData}
           xKey="month"
           yKey="value"
         />
+
         <BarChart
           title="Tiket Penjualan Terbanyak"
           data={topTicketData}

@@ -10,11 +10,11 @@ const NAV_ITEMS = [
   },
   {
     label: "Daftar Transaksi",
-    path: "/admin/transaksi",
+    path: "/admin/transactionlist",
   },
   {
     label: "Pengguna",
-    path: "/admin/pengguna",
+    path: "/admin/userlist",
   },
   {
     label: "Tiket",
@@ -42,9 +42,7 @@ export default function AdminHeader() {
                 text-sm
                 font-medium
                 transition
-                ${
-                  isActive ? "text-primary" : "text-gray-500 hover:text-primary"
-                }`
+                ${isActive ? "text-black" : "text-gray-500 hover:text-black"}`
               }
             >
               {item.label}

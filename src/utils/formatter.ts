@@ -11,7 +11,11 @@ export const formatter = {
     return new Intl.NumberFormat("id-ID").format(value);
   },
 
-  date(value: Date) {
-    return new Intl.DateTimeFormat("id-ID").format(value);
+  date(value: string) {
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(value));
   },
 };

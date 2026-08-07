@@ -1,6 +1,6 @@
 import type { BaseTableProps } from "../tables/types";
 
-export default function BaseTable<T extends Record<string, unknown>>({
+export default function BaseTable<T extends object>({
   columns,
   data,
   toolbar,

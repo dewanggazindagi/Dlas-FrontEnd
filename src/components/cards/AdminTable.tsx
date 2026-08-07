@@ -62,6 +62,7 @@ export default function AdminTable({ data }: AdminTable) {
       <div className="flex justify-between items-center mb-6">
         <TableSearch
           value={searchValue}
+          placeholder="Cari Nama Tiket"
           onChange={(value) => {
             setSearchValue(value);
             setCurrentPage(1);

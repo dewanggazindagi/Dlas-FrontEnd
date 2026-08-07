@@ -1,4 +1,6 @@
-export const transactionData = [
+import type { Transaction } from "../../types/transaction";
+
+export const transactionData: Transaction[] = [
   {
     id: "#2999",
     ticket: "Paket Hemat A",
@@ -7,6 +9,8 @@ export const transactionData = [
     nonCash: 30000000,
     cash: 30000000,
     total: 30000000,
+    online: 15000000,
+    date: "2026-08-02",
   },
   {
     id: "#3000",
@@ -16,6 +20,8 @@ export const transactionData = [
     nonCash: 70000000,
     cash: 70000000,
     total: 70000000,
+    online: 30000000,
+    date: "2026-08-01",
   },
   {
     id: "#3001",
@@ -25,6 +31,8 @@ export const transactionData = [
     nonCash: 20000000,
     cash: 20000000,
     total: 20000000,
+    online: 8000000,
+    date: "2026-07-29",
   },
   {
     id: "#3002",
@@ -34,6 +42,8 @@ export const transactionData = [
     nonCash: 90000000,
     cash: 90000000,
     total: 90000000,
+    online: 45000000,
+    date: "2026-07-15",
   },
   {
     id: "#3003",
@@ -43,6 +53,8 @@ export const transactionData = [
     nonCash: 40000000,
     cash: 40000000,
     total: 40000000,
+    online: 12000000,
+    date: "2026-06-20",
   },
   {
     id: "#3004",
@@ -52,6 +64,8 @@ export const transactionData = [
     nonCash: 80000000,
     cash: 80000000,
     total: 80000000,
+    online: 35000000,
+    date: "2026-05-18",
   },
   {
     id: "#3005",
@@ -61,6 +75,8 @@ export const transactionData = [
     nonCash: 60000000,
     cash: 60000000,
     total: 60000000,
+    online: 25000000,
+    date: "2026-03-10",
   },
   {
     id: "#3006",
@@ -70,5 +86,7 @@ export const transactionData = [
     nonCash: 10000000,
     cash: 10000000,
     total: 10000000,
+    online: 4000000,
+    date: "2026-01-05",
   },
 ];
