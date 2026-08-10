@@ -1,4 +1,4 @@
-import type { BaseTableProps } from "../tables/types";
+import type { BaseTableProps } from "./types";
 
 export default function BaseTable<T extends object>({
   columns,

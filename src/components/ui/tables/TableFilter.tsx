@@ -1,5 +1,5 @@
 import { List } from "lucide-react";
-import Dropdown, { type DropdownOption } from "../ui/Dropdown";
+import Dropdown, { type DropdownOption } from "../Dropdown";
 
 interface Props {
   options: DropdownOption[];

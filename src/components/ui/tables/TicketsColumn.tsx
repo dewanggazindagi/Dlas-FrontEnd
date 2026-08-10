@@ -1,6 +1,6 @@
-import type { TableColumn } from "../tables/types";
-import { transactionData } from "../../services/data/transactionData";
-import { formatter } from "../../utils/formatter";
+import type { TableColumn } from "./types";
+import { transactionData } from "../../../services/data/transactionData";
+import { formatter } from "../../../utils/formatter";
 
 type Ticket = (typeof transactionData)[number];
 

@@ -12,20 +12,12 @@ export type PaymentMethod =
 
 export interface TransactionTable {
   id: string;
-
   ticket: string;
-
   customer: string;
-
   quantity: number;
-
   paymentMethod: PaymentMethod;
-
   status: TransactionStatus;
-
   totalPayment: number;
-
   visitDate: string;
-
   orderDate: string;
 }

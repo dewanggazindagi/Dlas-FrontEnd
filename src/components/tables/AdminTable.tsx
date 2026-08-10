@@ -1,10 +1,10 @@
-import BaseTable from "../tables/BaseTable";
-import { columns } from "../tables/TicketsColumn";
+import BaseTable from "../ui/tables/BaseTable";
+import { columns } from "../ui/tables/TicketsColumn";
 import { transactionData } from "../../services/data/transactionData";
 import { useEffect, useState } from "react";
-import TableFilter from "../tables/TableFilter";
-import TableSearch from "../tables/TableSearch";
-import TablePagination from "../tables/TablePagination";
+import TableFilter from "../ui/tables/TableFilter";
+import TableSearch from "../ui/tables/TableSearch";
+import TablePagination from "../ui/tables/TablePagination";
 import usePagination from "../../hooks/usePagination";
 
 interface AdminTable {

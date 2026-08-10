@@ -1,11 +1,13 @@
-import type { TableColumn } from "../tables/types";
-import type { transactionTableData } from "../../services/data/transactionTableData";
-import { formatter } from "../../utils/formatter";
-import Badge from "../ui/Badge";
+import type { TableColumn } from "./types";
+import type { transactionTableData } from "../../../services/data/transactionTableData";
+import { formatter } from "../../../utils/formatter";
+import Badge from "../Badge";
 
 type Transaction = (typeof transactionTableData)[number];
 
-export const columns: TableColumn<Transaction>[] = [
+export const getTransactionColumns = (
+  onDetail: (row: Transaction) => void,
+): TableColumn<Transaction>[] => [
   {
     key: "id",
     header: "ID Pesanan",
@@ -59,8 +61,11 @@ export const columns: TableColumn<Transaction>[] = [
     key: "id",
     header: "",
     width: "80px",
-    render: () => (
-      <button className="font-semibold text-primary hover:underline">
+    render: (row) => (
+      <button
+        onClick={() => onDetail(row)}
+        className="font-semibold text-primary hover:underline"
+      >
         Detail
       </button>
     ),

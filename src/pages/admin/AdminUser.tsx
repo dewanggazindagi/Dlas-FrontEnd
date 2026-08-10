@@ -1,12 +1,14 @@
 import AdminLayout from "../../components/layout/Admin/AdminLayout";
-import AdminAnalisysCard from "../../components/cards/AdminAnalisysCard";
-import AdminTable from "../../components/cards/AdminTable";
+import AdminUserCard from "../../components/cards/AdminUserCard";
+import AdminUserTable from "../../components/tables/AdminUserTable";
+import { userTableData } from "../../services/data/userTableData";
 
 export default function AdminUser() {
   return (
     <AdminLayout>
-      <div className="p-10">
-        <h1 className="text-2xl font-bold mb-5">Daftar Pengguna</h1>
+      <div className="grid gap-7 p-10">
+        <AdminUserCard data={userTableData} />
+        <AdminUserTable data={userTableData} />
       </div>
     </AdminLayout>
   );
