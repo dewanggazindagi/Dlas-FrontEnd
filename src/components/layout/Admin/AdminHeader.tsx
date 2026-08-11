@@ -18,17 +18,17 @@ const NAV_ITEMS = [
   },
   {
     label: "Tiket",
-    path: "/admin/tiket",
+    path: "/admin/ticket",
   },
   {
     label: "Konten Website",
-    path: "/admin/konten",
+    path: "/admin/websitecontent",
   },
 ];
 
 export default function AdminHeader() {
   return (
-    <header className="h-22.5 w-full px-10 fixed z-100 bg-white">
+    <header className="h-22.5 w-full px-10 fixed z-99 bg-white">
       <div className="mx-auto h-full flex items-center justify-between">
         <img src={logo} alt="D'Las Logo" className="h-22.5" />
 

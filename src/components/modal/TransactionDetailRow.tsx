@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
+
 interface TransactionDetailRowProps {
   label: string;
-  value: React.ReactNode;
+  value: ReactNode;
   border?: boolean;
 }
 
@@ -11,13 +13,19 @@ export default function TransactionDetailRow({
 }: TransactionDetailRowProps) {
   return (
     <div
-      className={`flex items-center justify-between py-4 ${
-        border ? "border-b border-dashed border-border" : ""
-      }`}
+      className={`
+        flex
+        min-h-13
+        items-center
+        justify-between
+        gap-4
+        py-3
+        ${border ? "border-b border-dashed border-border" : ""}
+      `}
     >
-      <p className="text-dark-gray text-sm">{label}</p>
+      <span className="text-sm text-dark-gray">{label}</span>
 
-      <div className="text-sm font-medium text-right">{value}</div>
+      <span className="text-right text-sm text-dark-gray">{value}</span>
     </div>
   );
 }

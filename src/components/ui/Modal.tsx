@@ -1,13 +1,13 @@
-import { type ReactNode, useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 interface ModalProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
-  title?: string;
+
   width?: string;
-  showCloseButton?: boolean;
   closeOnOverlay?: boolean;
 }
 
@@ -15,9 +15,7 @@ export default function Modal({
   open,
   onClose,
   children,
-  title,
-  width = "max-w-lg",
-  showCloseButton = true,
+  width = "max-w-md",
   closeOnOverlay = true,
 }: ModalProps) {
   useEffect(() => {
@@ -30,6 +28,7 @@ export default function Modal({
     };
 
     document.body.style.overflow = "hidden";
+
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
@@ -40,47 +39,72 @@ export default function Modal({
 
   if (!open) return null;
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4"
-      onClick={() => {
-        if (closeOnOverlay) onClose();
+      className="
+        fixed
+        inset-0
+        z-9999
+        flex
+        items-center
+        justify-center
+        bg-black/30
+        px-4
+        py-6
+      "
+      onMouseDown={() => {
+        if (closeOnOverlay) {
+          onClose();
+        }
       }}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
         className={`
           relative
           w-full
           ${width}
-          rounded-3xl
+          max-h-[95vh]
+          overflow-y-auto
+          rounded-4xl
           bg-white
           shadow-2xl
-          animate-in
-          fade-in
-          zoom-in-95
-          duration-200
         `}
+        onMouseDown={(event) => event.stopPropagation()}
       >
-        {(title || showCloseButton) && (
-          <div className="flex items-center justify-between border-b border-border px-6 py-5">
-            {title ?
-              <h2 className="text-xl font-semibold">{title}</h2>
-            : <div />}
+        {/* Close Button */}
 
-            {showCloseButton && (
-              <button
-                onClick={onClose}
-                className="rounded-full p-2 transition hover:bg-gray-100"
-              >
-                <X size={20} />
-              </button>
-            )}
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={onClose}
+          className="
+            absolute
+            right-4
+            top-4
+            z-10
+            flex
+            h-7
+            w-7
+            items-center
+            justify-center
+            rounded-full
+            border
+            border-gray-200
+            bg-white
+            text-gray-500
+            shadow-sm
+            transition
+            hover:bg-gray-100
+            hover:text-gray-800
+          "
+          aria-label="Tutup modal"
+        >
+          <X size={15} />
+        </button>
 
-        <div className="p-6">{children}</div>
+        {children}
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }

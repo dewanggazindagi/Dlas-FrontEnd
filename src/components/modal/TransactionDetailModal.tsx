@@ -1,8 +1,9 @@
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import TransactionDetailRow from "./TransactionDetailRow";
+import logo from "../../assets/images/Logo.webp";
 
-import { Download, CheckCircle2 } from "lucide-react";
+import { Download, CircleCheck } from "lucide-react";
 
 import { formatter } from "../../utils/formatter";
 import type { TransactionTable } from "../../types/transactionTable";
@@ -22,144 +23,268 @@ export default function TransactionDetailModal({
 
   const ticketPrice = transaction.totalPayment / transaction.quantity;
 
-  const ticketStatus =
-    transaction.status === "Dibayar" ? "Siap Digunakan"
-    : transaction.status === "Menunggu" ? "Belum Dibayar"
-    : "Dibatalkan";
+  const isPaid = transaction.status === "Dibayar";
+  const isPending = transaction.status === "Menunggu";
+  const isCancelled = transaction.status === "Dibatalkan";
 
   return (
-    <Modal open={open} onClose={onClose} width="max-w-md">
-      {/* HEADER */}
-
-      <div className="mb-6">
-        {transaction.status === "Dibayar" && (
-          <div className="flex items-start gap-3">
-            <CheckCircle2 size={30} className="text-green-600" />
+    <Modal open={open} onClose={onClose} width="max-w-[390px]">
+      <div className="p-4">
+        <div className="mb-4 pr-8">
+          <div className="flex items-center gap-2.5">
+            {isPaid && (
+              <div
+                className="
+                  flex
+                  h-7
+                  w-7
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-primary
+                  text-white
+                "
+              >
+                <CircleCheck size={20} strokeWidth={2.5} />
+              </div>
+            )}
 
             <div>
-              <h2 className="font-semibold text-xl">Pembayaran Berhasil</h2>
+              <h2 className="text-xl font-semibold leading-5">
+                {isPaid && "Pembayaran Berhasil"}
+                {isPending && "Menunggu Pembayaran"}
+                {isCancelled && "Pembelian Dibatalkan"}
+              </h2>
 
-              <p className="text-sm text-dark-gray">
-                Tiket sudah siap untuk digunakan
+              <p className="mt-2 text-sm text-dark-gray">
+                {isPaid && "Tiket sudah siap untuk digunakan"}
+
+                {isPending && "Selesaikan pembayaran"}
+
+                {isCancelled && "Jika sudah dibatalkan, tidak bisa dipulihkan"}
               </p>
+            </div>
+          </div>
+        </div>
+
+        {isPaid && (
+          <div
+            className="
+              mb-3
+              rounded-xl
+              border
+              border-gray-200
+              bg-white
+              p-3
+            "
+          >
+            <img
+              src={logo}
+              alt="D'Las"
+              className="
+                mx-auto
+                mb-3
+                h-12
+                w-auto
+                object-contain
+              "
+            />
+
+            <div className="flex justify-center">
+              <img
+                src="/qrcode.png"
+                alt="QR Code Tiket"
+                className="h-36 w-36 object-contain"
+              />
+            </div>
+
+            <h3 className="mt-3 text-center text-base font-semibold">
+              {transaction.ticket}
+            </h3>
+
+            <p className="mt-1 text-center text-xs text-dark-gray">
+              ID : {transaction.id}
+            </p>
+
+            <div
+              className="
+                my-4.5
+                rounded-lg
+                border
+                border-gray-200
+                py-2
+                text-center
+                text-sm
+                font-medium
+              "
+            >
+              {transaction.quantity} Pengunjung
+            </div>
+
+            <div className="px-3">
+              <TransactionDetailRow
+                label="Status Tiket"
+                value={
+                  <span className="font-medium text-primary">
+                    Siap Digunakan
+                  </span>
+                }
+              />
+
+              <TransactionDetailRow
+                label="Tiket Dipesan"
+                value={transaction.ticket}
+              />
+
+              <TransactionDetailRow
+                label="Dipesan pada"
+                value={formatter.date(transaction.orderDate)}
+              />
             </div>
           </div>
         )}
 
-        {transaction.status === "Menunggu" && (
-          <>
-            <h2 className="font-semibold text-xl">Menunggu Pembayaran</h2>
+        {isPending && (
+          <div
+            className="
+            rounded-xl
+            border
+            border-gray-200
+            px-3
+          "
+          >
+            <TransactionDetailRow label="ID Pesanan" value={transaction.id} />
 
-            <p className="text-sm text-dark-gray">Selesaikan pembayaran</p>
-          </>
-        )}
+            <TransactionDetailRow
+              label="Tiket Dipesan"
+              value={transaction.ticket}
+            />
 
-        {transaction.status === "Dibatalkan" && (
-          <>
-            <h2 className="font-semibold text-xl">Pembelian Dibatalkan</h2>
+            <TransactionDetailRow
+              label="Dipesan pada"
+              value={formatter.date(transaction.orderDate)}
+            />
 
-            <p className="text-sm text-dark-gray">
-              Jika sudah dibatalkan, tidak bisa dipulihkan
-            </p>
-          </>
-        )}
-      </div>
+            <TransactionDetailRow
+              label="Berlibur pada"
+              value={formatter.date(transaction.visitDate)}
+            />
 
-      {/* QR */}
+            <TransactionDetailRow
+              label="Metode Pembayaran"
+              value={transaction.paymentMethod}
+            />
 
-      {transaction.status === "Dibayar" && (
-        <div className="mb-5 rounded-2xl border border-border p-5">
-          <img src="/logo.webp" className="mx-auto mb-4 h-14" />
+            <TransactionDetailRow
+              label="Harga Tiket"
+              value={
+                <div className="flex items-center gap-2">
+                  <span>x{transaction.quantity}</span>
 
-          <img src="/qrcode.png" className="mx-auto mb-4 w-40" />
+                  <span>{formatter.rupiah(ticketPrice)}</span>
+                </div>
+              }
+            />
 
-          <h3 className="text-center font-semibold text-lg">
-            {transaction.ticket}
-          </h3>
-
-          <p className="text-center text-dark-gray text-sm">
-            ID : {transaction.id}
-          </p>
-
-          <div className="mt-4 rounded-xl border border-border py-2 text-center font-medium">
-            {transaction.quantity} Pengunjung
+            <TransactionDetailRow
+              label="Total Pembayaran"
+              value={
+                <span className="font-semibold text-gray-900">
+                  {formatter.rupiah(transaction.totalPayment)}
+                </span>
+              }
+              border={false}
+            />
           </div>
-        </div>
-      )}
-
-      {/* DETAIL */}
-
-      <div className="rounded-2xl border border-border px-5">
-        {transaction.status === "Dibayar" && (
-          <TransactionDetailRow
-            label="Status Tiket"
-            value={
-              <span className="text-primary font-semibold">{ticketStatus}</span>
-            }
-          />
         )}
 
-        <TransactionDetailRow label="ID Pesanan" value={transaction.id} />
+        {isCancelled && (
+          <div
+            className="
+            rounded-xl
+            border
+            border-gray-200
+            px-3
+          "
+          >
+            <TransactionDetailRow label="ID Pesanan" value={transaction.id} />
 
-        <TransactionDetailRow
-          label="Tiket Dipesan"
-          value={transaction.ticket}
-        />
+            <TransactionDetailRow
+              label="Tiket Dipesan"
+              value={transaction.ticket}
+            />
 
-        <TransactionDetailRow
-          label="Dipesan pada"
-          value={transaction.orderDate}
-        />
+            <TransactionDetailRow
+              label="Dipesan pada"
+              value={formatter.date(transaction.orderDate)}
+            />
 
-        <TransactionDetailRow
-          label="Berlibur pada"
-          value={transaction.visitDate}
-        />
+            <TransactionDetailRow
+              label="Berlibur pada"
+              value={formatter.date(transaction.visitDate)}
+            />
 
-        <TransactionDetailRow
-          label="Metode Pembayaran"
-          value={transaction.paymentMethod}
-        />
+            <TransactionDetailRow
+              label="Metode Pembayaran"
+              value={transaction.paymentMethod}
+            />
 
-        <TransactionDetailRow
-          label="Harga Tiket"
-          value={
-            <>
-              x{transaction.quantity} &nbsp;
-              {formatter.rupiah(ticketPrice)}
-            </>
-          }
-        />
+            <TransactionDetailRow
+              label="Harga Tiket"
+              value={
+                <div className="flex items-center gap-2">
+                  <span>x{transaction.quantity}</span>
 
-        <TransactionDetailRow
-          label="Total Pembayaran"
-          value={
-            <span className="font-semibold">
-              {formatter.rupiah(transaction.totalPayment)}
-            </span>
-          }
-          border={false}
-        />
-      </div>
+                  <span>{formatter.rupiah(ticketPrice)}</span>
+                </div>
+              }
+            />
 
-      {/* BUTTON */}
+            <TransactionDetailRow
+              label="Total Pembayaran"
+              value={
+                <span className="font-semibold text-gray-900">
+                  {formatter.rupiah(transaction.totalPayment)}
+                </span>
+              }
+              border={false}
+            />
+          </div>
+        )}
 
-      <div className="mt-6">
-        {transaction.status === "Dibayar" && (
+        {isPaid && (
           <Button
             variant="primary"
-            className="w-full"
-            startIcon={<Download size={18} />}
+            className="
+              mt-3
+              h-10
+              w-full
+              rounded-full
+              font-semibold
+            "
+            startIcon={<Download size={16} />}
           >
             Print Tiket
           </Button>
         )}
 
-        {transaction.status === "Menunggu" && (
-          <Button variant="danger" className="w-full">
+        {isPending && (
+          <Button
+            variant="danger"
+            className="
+              mt-3
+              h-10
+              w-full
+              rounded-full
+              font-semibold
+            "
+          >
             Batalkan Pembelian
           </Button>
         )}
+
+        {isCancelled && <div className="mt-3" />}
       </div>
     </Modal>
   );
