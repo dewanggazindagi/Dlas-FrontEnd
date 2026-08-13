@@ -65,7 +65,7 @@ export default function Modal({
           ${width}
           max-h-[95vh]
           overflow-y-auto
-          rounded-4xl
+          rounded-2xl
           bg-white
           shadow-2xl
         `}

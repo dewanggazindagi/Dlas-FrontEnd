@@ -28,7 +28,7 @@ export default function TransactionDetailModal({
   const isCancelled = transaction.status === "Dibatalkan";
 
   return (
-    <Modal open={open} onClose={onClose} width="max-w-[390px]">
+    <Modal open={open} onClose={onClose} width="max-w-[390px] p-3">
       <div className="p-4">
         <div className="mb-4 pr-8">
           <div className="flex items-center gap-2.5">

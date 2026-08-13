@@ -6,6 +6,9 @@ import TableFilter from "../ui/tables/TableFilter";
 import TablePagination from "../ui/tables/TablePagination";
 import TableSearch from "../ui/tables/TableSearch";
 
+import AddLoketModal from "../modal/AddLoketModal";
+import DeleteUserModal from "../modal/DeleteUserModal";
+
 import usePagination from "../../hooks/usePagination";
 
 import { userTableData } from "../../services/data/userTableData";
@@ -15,12 +18,43 @@ interface AdminUserTableProps {
 }
 
 export default function AdminUserTable({ data }: AdminUserTableProps) {
+  // =====================================
+  // DATA USER
+  // =====================================
+
+  const [users, setUsers] = useState(data);
+
+  // =====================================
+  // SEARCH
+  // =====================================
+
   const [searchValue, setSearchValue] = useState("");
+
+  // =====================================
+  // FILTER ROLE
+  // =====================================
+
   const [role, setRole] = useState("all");
+
+  // =====================================
+  // DELETE MODAL
+  // =====================================
+
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState<
     (typeof userTableData)[number] | null
   >(null);
+
+  // =====================================
+  // ADD USER MODAL
+  // =====================================
+
+  const [openAddModal, setOpenAddModal] = useState(false);
+
+  // =====================================
+  // ROLE OPTIONS
+  // =====================================
 
   const roleOptions = [
     {
@@ -37,15 +71,20 @@ export default function AdminUserTable({ data }: AdminUserTableProps) {
     },
   ];
 
+  // =====================================
+  // DELETE USER
+  // =====================================
+
   const handleDelete = (user: (typeof userTableData)[number]) => {
     setSelectedUser(user);
-
-    console.log("Delete user:", user);
+    setOpenDeleteModal(true);
   };
 
-  const columns = getUserColumns(handleDelete);
+  // =====================================
+  // SEARCH
+  // =====================================
 
-  const searchedData = data.filter((item) => {
+  const searchedData = users.filter((item) => {
     const keyword = searchValue.toLowerCase();
 
     return (
@@ -57,21 +96,69 @@ export default function AdminUserTable({ data }: AdminUserTableProps) {
     );
   });
 
+  // =====================================
+  // FILTER ROLE
+  // =====================================
+
   const filteredData =
     role === "all" ? searchedData : (
       searchedData.filter((item) => item.role === role)
     );
 
+  // =====================================
+  // PAGINATION
+  // =====================================
+
   const { currentData, currentPage, totalPages, setCurrentPage } =
     usePagination(filteredData, 8);
+
+  // =====================================
+  // RESET PAGINATION
+  // =====================================
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchValue, role, setCurrentPage]);
 
+  // =====================================
+  // CONFIRM DELETE
+  // =====================================
+
+  const handleConfirmDelete = (user: (typeof userTableData)[number]) => {
+    setUsers((prev) => prev.filter((item) => item.id !== user.id));
+
+    setOpenDeleteModal(false);
+    setSelectedUser(null);
+
+    setCurrentPage(1);
+  };
+
+  // =====================================
+  // ADD USER
+  // =====================================
+
+  const handleAddUser = (newUser: (typeof userTableData)[number]) => {
+    setUsers((prev) => [...prev, newUser]);
+
+    setOpenAddModal(false);
+    setCurrentPage(1);
+  };
+
+  // =====================================
+  // TABLE COLUMNS
+  // =====================================
+
+  const columns = getUserColumns(handleDelete);
+
   return (
     <div>
+      {/* =================================
+          TOOLBAR
+      ================================= */}
+
       <div className="mb-6 flex items-center justify-between">
+        {/* SEARCH */}
+
         <TableSearch
           value={searchValue}
           placeholder="Cari ID, Nama Pengguna"
@@ -80,6 +167,9 @@ export default function AdminUserTable({ data }: AdminUserTableProps) {
             setCurrentPage(1);
           }}
         />
+
+        {/* FILTER + ADD */}
+
         <div className="flex items-center gap-3">
           <TableFilter
             value={role}
@@ -90,8 +180,10 @@ export default function AdminUserTable({ data }: AdminUserTableProps) {
               setCurrentPage(1);
             }}
           />
+
           <button
             type="button"
+            onClick={() => setOpenAddModal(true)}
             className="
               h-11
               rounded-full
@@ -110,7 +202,29 @@ export default function AdminUserTable({ data }: AdminUserTableProps) {
         </div>
       </div>
 
+      {/* =================================
+          TABLE
+      ================================= */}
+
       <BaseTable columns={columns} data={currentData} />
+
+      <DeleteUserModal
+        open={openDeleteModal}
+        user={selectedUser}
+        onClose={() => {
+          setOpenDeleteModal(false);
+          setSelectedUser(null);
+        }}
+        onConfirm={handleConfirmDelete}
+      />
+
+      <AddLoketModal
+        open={openAddModal}
+        onClose={() => {
+          setOpenAddModal(false);
+        }}
+        onSubmit={handleAddUser}
+      />
 
       <TablePagination
         currentPage={currentPage}
