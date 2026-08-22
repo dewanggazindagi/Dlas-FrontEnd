@@ -9,7 +9,7 @@ import AdminContent from "../pages/Admin/AdminContent";
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/admin/dashboard" element={<Dashboard />} />
+      <Route path="/admin" element={<Dashboard />} />
       <Route path="/admin/transactionlist" element={<AdminTransactionList />} />
       <Route path="/admin/userlist" element={<AdminUser />} />
       <Route path="/admin/ticket" element={<AdminTicket />} />

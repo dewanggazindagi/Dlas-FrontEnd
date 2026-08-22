@@ -6,7 +6,7 @@ import logo from "../../../assets/images/Logo.webp";
 const NAV_ITEMS = [
   {
     label: "Dashboard",
-    path: "/admin/dashboard",
+    path: "/admin",
   },
   {
     label: "Daftar Transaksi",

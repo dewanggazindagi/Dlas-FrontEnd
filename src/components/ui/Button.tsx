@@ -33,8 +33,7 @@ const Button = ({
   const variantClasses = {
     primary:
       "bg-primary text-white hover:bg-primary-hover disabled:bg--primary-soft disabled:text-white",
-    outline:
-      "border bg-white text--primary hover:bg--primary-soft",
+    outline: "border bg-white text--primary hover:bg--primary-soft",
     danger: "bg-danger text-white hover:bg-danger-soft",
   };
 
