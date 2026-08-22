@@ -1,0 +1,10 @@
+.rdp-root {
+  --rdp-accent-color: #238302;
+  --rdp-accent-background-color: rgba(35, 131, 2, 0.1);
+  --rdp-day-height: 40px;
+  --rdp-day-width: 40px;
+  --rdp-day_button-height: 36px;
+  --rdp-day_button-width: 36px;
+  --rdp-font-family: "Inter", sans-serif;
+  --rdp-today-color: #238302;
+}
