@@ -1,3 +1,4 @@
+import { useAuth } from "../../../context/AuthContext";
 import { NavLink } from "react-router-dom";
 import { LogOut, CircleUserRound } from "lucide-react";
 import Button from "../../ui/Button";
@@ -6,7 +7,7 @@ import logo from "../../../assets/images/Logo.webp";
 const NAV_ITEMS = [
   {
     label: "Dashboard",
-    path: "/admin",
+    path: "/admin/dashboard",
   },
   {
     label: "Daftar Transaksi",
@@ -26,7 +27,10 @@ const NAV_ITEMS = [
   },
 ];
 
+
 export default function AdminHeader() {
+  const { logout } = useAuth();
+
   return (
     <header className="h-22.5 w-full px-10 fixed z-99 bg-white">
       <div className="mx-auto h-full flex items-center justify-between">
@@ -64,6 +68,7 @@ export default function AdminHeader() {
 
           <Button
             variant="outline"
+            onClick={logout}
             className="p-3.5 hover:bg-danger-soft border-border"
             size="undefined"
           >

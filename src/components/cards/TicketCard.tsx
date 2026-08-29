@@ -39,15 +39,30 @@ export default function TicketCard({
             bg-gray-100
           "
         >
-          <img
-            src={ticket.image}
-            alt={ticket.name}
+          <div
             className="
-            h-full
-            w-full
-              object-cover
-            "
-          />
+    h-35
+    w-35
+    shrink-0
+    overflow-hidden
+    rounded-xl
+    bg-gray-100
+  "
+          >
+            <img
+              src={
+                ticket.gambar?.[0]?.url ??
+                ticket.gambar?.[0]?.gambar ??
+                "/images/default-ticket.webp"
+              }
+              alt={ticket.name}
+              className="
+      h-full
+      w-full
+      object-cover
+    "
+            />
+          </div>
         </div>
 
         <div className="min-w-0 grid justify-between">
