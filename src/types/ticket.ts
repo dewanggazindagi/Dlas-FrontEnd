@@ -1,65 +1,22 @@
-export interface Ticket {
-  id: string;
-
-  namaTiket: string;
-
-  name: string;
-
-  price: number;
-
-  hargaWeekdays: number;
-
-  hargaWeekend: number;
-
-  deskripsi: string;
-
-  description: string;
-
-  status: string;
-
-  isActive: boolean;
-
-  jenisTiket: "SATUAN" | "PAKET";
-
-  category: string;
-
-  items: string[];
-
-  ketentuan: TicketKetentuan[];
-
-  gambar: TicketGambar[];
-
-  image: string | TicketGambar[];
-
-  createdAt: string;
-
-  updatedAt: string;
-}
-
-export interface TicketKetentuan {
-  id: string;
-
-  ticketId: string;
-
-  deskripsi: string;
-
-  urutan: number;
-
-  createdAt: string;
-
-  updatedAt: string;
-}
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface TicketGambar {
   id: string;
+  urlGambar: string;
+}
 
-  ticketId: string;
-
-  url?: string;
-
-  gambar?: string;
-
+export interface Ticket {
+  id: string;
+  name: string;
+  price: number;
+  weekdayPrice: number;
+  weekendPrice: number;
+  description: string;
+  status: string;
+  isActive: boolean;
+  category: "Paket Hemat" | "Regular/Satuan";
+  items: string[];
+  ketentuan: any[];
+  gambar: TicketGambar[];
   createdAt?: string;
-
   updatedAt?: string;
 }

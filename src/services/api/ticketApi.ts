@@ -1,8 +1,8 @@
 import api from "./axios";
 
-// =====================================================
-// TIKET SATUAN
-// =====================================================
+// =========================================================
+// TYPES
+// =========================================================
 
 export interface CreateTicketPayload {
   namaTiket: string;
@@ -11,12 +11,8 @@ export interface CreateTicketPayload {
   deskripsi: string;
   status: string;
   ketentuan: string[];
-  gambar: string[];
+  gambar: File[];
 }
-
-// =====================================================
-// TIKET PAKET
-// =====================================================
 
 export interface CreatePackageTicketPayload {
   namaTiket: string;
@@ -25,13 +21,13 @@ export interface CreatePackageTicketPayload {
   deskripsi: string;
   status: string;
   ketentuan: string[];
-  gambar: string[];
+  gambar: File[];
   wahanaIds: string[];
 }
 
-// =====================================================
-// GET SEMUA TIKET SATUAN
-// =====================================================
+// =========================================================
+// GET TICKETS
+// =========================================================
 
 export async function getTickets() {
   const response = await api.get("/tiket-wahana");
@@ -39,46 +35,99 @@ export async function getTickets() {
   return response.data;
 }
 
-// =====================================================
-// GET SEMUA TIKET PAKET
-// =====================================================
-
 export async function getPackageTickets() {
   const response = await api.get("/tiket/paket");
 
   return response.data;
 }
 
-// =====================================================
-// GET DETAIL TIKET SATUAN
-// =====================================================
-
 export async function getTicketById(id: string) {
-  const response = await api.get(
-    `/tiket-wahana/${id}`,
-  );
+  const response = await api.get(`/tiket-wahana/${id}`);
 
   return response.data;
 }
 
-// =====================================================
-// CREATE TIKET SATUAN
-// =====================================================
+export async function getPackageTicketById(id: string) {
+  const response = await api.get(`/tiket/paket/${id}`);
+
+  return response.data;
+}
+
+// =========================================================
+// CREATE TICKET SATUAN
+// =========================================================
 
 export async function createTicket(
   payload: CreateTicketPayload,
 ) {
+  const formData = new FormData();
+
+  formData.append(
+    "namaTiket",
+    payload.namaTiket,
+  );
+
+  formData.append(
+    "hargaWeekdays",
+    String(payload.hargaWeekdays),
+  );
+
+  formData.append(
+    "hargaWeekend",
+    String(payload.hargaWeekend),
+  );
+
+  formData.append(
+    "deskripsi",
+    payload.deskripsi,
+  );
+
+  formData.append(
+    "status",
+    payload.status,
+  );
+
+  payload.ketentuan.forEach((item) => {
+    formData.append(
+      "ketentuan",
+      item,
+    );
+  });
+
+  payload.gambar.forEach((file) => {
+    formData.append(
+      "gambar",
+      file,
+    );
+  });
+
   const response = await api.post(
     "/tiket-wahana",
-    payload,
+    formData,
   );
 
   return response.data;
 }
 
-// =====================================================
-// CREATE TIKET PAKET
-// =====================================================
+// =========================================================
+// UPDATE TICKET SATUAN
+// =========================================================
+
+export async function updateTicket(
+  id: string,
+  formData: FormData,
+) {
+  const response = await api.patch(
+    `/tiket-wahana/${id}`,
+    formData,
+  );
+
+  return response.data;
+}
+
+// =========================================================
+// CREATE PACKAGE TICKET
+// =========================================================
 
 export async function createPackageTicket(
   payload: CreatePackageTicketPayload,
@@ -110,32 +159,23 @@ export async function createPackageTicket(
     payload.status,
   );
 
-  // ============================
   // KETENTUAN
-  // ============================
-
-  payload.ketentuan.forEach((term) => {
+  payload.ketentuan.forEach((item) => {
     formData.append(
       "ketentuan",
-      term,
+      item,
     );
   });
 
-  // ============================
   // GAMBAR
-  // ============================
-
-  payload.gambar.forEach((image) => {
+  payload.gambar.forEach((file) => {
     formData.append(
       "gambar",
-      image,
+      file,
     );
   });
 
-  // ============================
-  // WAHANA DALAM PAKET
-  // ============================
-
+  // WAHANA
   payload.wahanaIds.forEach((id) => {
     formData.append(
       "wahanaIds",
@@ -151,17 +191,37 @@ export async function createPackageTicket(
   return response.data;
 }
 
-// =====================================================
-// UPDATE TIKET SATUAN
-// =====================================================
+// =========================================================
+// UPDATE PACKAGE TICKET
+// =========================================================
 
-export async function updateTicket(
+export async function updatePackageTicket(
   id: string,
-  payload: CreateTicketPayload,
+  formData: FormData,
 ) {
   const response = await api.patch(
-    `/tiket-wahana/${id}`,
-    payload,
+    `/tiket/paket/${id}`,
+    formData,
+  );
+
+  return response.data;
+}
+
+// =========================================================
+// DELETE TICKET
+// =========================================================
+
+export async function deleteTicket(
+  id: string,
+  jenisTiket: string,
+) {
+  const endpoint =
+    jenisTiket === "Paket Hemat"
+      ? `/tiket/paket/${id}`
+      : `/tiket-wahana/${id}`;
+
+  const response = await api.delete(
+    endpoint,
   );
 
   return response.data;

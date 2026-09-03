@@ -12,6 +12,14 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
       },
+
+      "/backend-image": {
+        target: "https://dlas-backend.onrender.com",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) =>
+          path.replace(/^\/backend-image/, ""),
+      },
     },
   },
 })

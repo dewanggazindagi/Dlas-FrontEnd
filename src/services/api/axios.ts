@@ -14,6 +14,7 @@ api.interceptors.request.use(
     console.log("=== AXIOS REQUEST ===");
     console.log("METHOD:", config.method?.toUpperCase());
     console.log("URL:", config.url);
+    console.log("FULL URL:", `${config.baseURL}${config.url}`);
     console.log("TOKEN ADA:", !!token);
 
     if (token) {

@@ -1,45 +1,54 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import TicketCard from "./TicketCard";
 import Button from "../ui/Button";
+import DeleteTicketModal from "../modal/DeleteTicketModal";
 
 import type { Ticket } from "../../types/ticket";
 
-import { getTickets, getPackageTickets } from "../../services/api/ticketApi";
+import {
+  getTickets,
+  getPackageTickets,
+  deleteTicket,
+} from "../../services/api/ticketApi";
 
 import { mapTicketApiToTicket } from "../../services/api/ticketAdapter";
 
 type Category = "Paket Hemat" | "Regular/Satuan";
 
-interface AdminTicketListProps {
-  onEdit?: (ticket: Ticket) => void;
-  onDelete?: (ticket: Ticket) => void;
-}
-
-export default function AdminTicketList({ onDelete }: AdminTicketListProps) {
+export default function AdminTicketList() {
   const navigate = useNavigate();
 
   const [category, setCategory] = useState<Category>("Regular/Satuan");
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
-
   const [packageTickets, setPackageTickets] = useState<Ticket[]>([]);
 
   const [loading, setLoading] = useState(true);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+
+  /*
+   * ============================================================
+   * GET DATA TIKET
+   * ============================================================
+   */
 
   useEffect(() => {
     const fetchTickets = async () => {
       try {
         setLoading(true);
 
-        // ==========================================
-        // AMBIL TIKET SATUAN
-        // ==========================================
+        /*
+         * --------------------------------------------------------
+         * TIKET REGULAR / SATUAN
+         * --------------------------------------------------------
+         */
 
         const regularResponse = await getTickets();
-
-        console.log("RESPONSE TIKET SATUAN:", regularResponse);
 
         const regularData =
           Array.isArray(regularResponse) ? regularResponse : (
@@ -48,15 +57,21 @@ export default function AdminTicketList({ onDelete }: AdminTicketListProps) {
 
         const mappedRegular = regularData.map(mapTicketApiToTicket);
 
+        console.log("====================================");
+        console.log("=== TIKET SATUAN ===");
+        console.log("RAW API:", regularData);
+        console.log("SETELAH ADAPTER:", mappedRegular);
+        console.log("====================================");
+
         setTickets(mappedRegular);
 
-        // ==========================================
-        // AMBIL TIKET PAKET
-        // ==========================================
+        /*
+         * --------------------------------------------------------
+         * TIKET PAKET
+         * --------------------------------------------------------
+         */
 
         const packageResponse = await getPackageTickets();
-
-        console.log("RESPONSE TIKET PAKET:", packageResponse);
 
         const packageData =
           Array.isArray(packageResponse) ? packageResponse : (
@@ -64,6 +79,12 @@ export default function AdminTicketList({ onDelete }: AdminTicketListProps) {
           );
 
         const mappedPackage = packageData.map(mapTicketApiToTicket);
+
+        console.log("====================================");
+        console.log("=== TIKET PAKET ===");
+        console.log("RAW API:", packageData);
+        console.log("SETELAH ADAPTER:", mappedPackage);
+        console.log("====================================");
 
         setPackageTickets(mappedPackage);
       } catch (error) {
@@ -76,32 +97,152 @@ export default function AdminTicketList({ onDelete }: AdminTicketListProps) {
     fetchTickets();
   }, []);
 
-  // ==========================================
-  // DATA YANG DITAMPILKAN
-  // ==========================================
+  /*
+   * ============================================================
+   * DATA YANG DITAMPILKAN
+   * ============================================================
+   */
 
   const data = category === "Paket Hemat" ? packageTickets : tickets;
 
+  /*
+   * ============================================================
+   * MAPPING TIKET SATUAN
+   * ============================================================
+   *
+   * Ini digunakan oleh TicketCard untuk mencari:
+   *
+   * ticket.items
+   *      ↓
+   * ID tiket satuan
+   *      ↓
+   * itemTickets[id]
+   *      ↓
+   * gambar tiket satuan
+   *
+   * Contoh:
+   *
+   * itemTickets["abc-123"] = {
+   *   id: "abc-123",
+   *   name: "D'las Zoo",
+   *   gambar: [...]
+   * }
+   */
+
+  const itemTickets = useMemo<Record<string, Ticket>>(() => {
+    return tickets.reduce<Record<string, Ticket>>((acc, ticket) => {
+      acc[String(ticket.id)] = ticket;
+
+      return acc;
+    }, {});
+  }, [tickets]);
+
+  /*
+   * ============================================================
+   * MAPPING NAMA TIKET SATUAN
+   * ============================================================
+   *
+   * Digunakan untuk menampilkan nama wahana pada
+   * daftar isi tiket paket.
+   */
+
+  const itemNames = useMemo<Record<string, string>>(() => {
+    return tickets.reduce<Record<string, string>>((acc, ticket) => {
+      acc[String(ticket.id)] = ticket.name;
+
+      return acc;
+    }, {});
+  }, [tickets]);
+
+  /*
+   * ============================================================
+   * DEBUG MAPPING
+   * ============================================================
+   */
+
+  console.log("=== ITEM TICKETS ===");
+  console.log(itemTickets);
+
+  console.log("=== ITEM NAMES ===");
+  console.log(itemNames);
+
+  /*
+   * ============================================================
+   * DELETE
+   * ============================================================
+   */
+
+  const handleDeleteTicket = async (ticket: Ticket) => {
+    try {
+      await deleteTicket(ticket.id, ticket.category);
+
+      if (ticket.category === "Regular/Satuan") {
+        setTickets((prev) => prev.filter((item) => item.id !== ticket.id));
+      }
+
+      if (ticket.category === "Paket Hemat") {
+        setPackageTickets((prev) =>
+          prev.filter((item) => item.id !== ticket.id),
+        );
+      }
+
+      setDeleteModalOpen(false);
+      setSelectedTicket(null);
+    } catch (error) {
+      console.error("Gagal menghapus tiket:", error);
+    }
+  };
+
+  /*
+   * ============================================================
+   * OPEN DELETE MODAL
+   * ============================================================
+   */
+
+  const handleOpenDeleteModal = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+    setDeleteModalOpen(true);
+  };
+
+  /*
+   * ============================================================
+   * CLOSE DELETE MODAL
+   * ============================================================
+   */
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setSelectedTicket(null);
+  };
+
+  /*
+   * ============================================================
+   * RENDER
+   * ============================================================
+   */
+
   return (
     <div>
-      {/* ================================= */}
+      {/* ====================================================== */}
       {/* HEADER */}
-      {/* ================================= */}
+      {/* ====================================================== */}
 
       <div className="mb-4 flex items-center justify-between">
-        {/* CATEGORY */}
-
+        {/* TAB */}
         <div className="flex items-center gap-1 rounded-full border border-border bg-white p-1 shadow-sm">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => setCategory("Paket Hemat")}
-            className={`h-11 ${
-              category === "Paket Hemat" ?
-                "border border-border bg-dark-gray font-semibold text-black"
-              : "border border-white bg-white font-medium text-dark-gray hover:bg-gray-50"
-            }`}
+            className={`
+              h-11
+              ${
+                category === "Paket Hemat" ?
+                  "border border-border bg-dark-gray font-semibold text-black"
+                : "border border-white bg-white font-medium text-dark-gray hover:bg-gray-50"
+              }
+            `}
           >
             Tiket Paket Hemat
           </Button>
@@ -111,19 +252,23 @@ export default function AdminTicketList({ onDelete }: AdminTicketListProps) {
             variant="outline"
             size="sm"
             onClick={() => setCategory("Regular/Satuan")}
-            className={`h-11 ${
-              category === "Regular/Satuan" ?
-                "border border-border bg-dark-gray font-semibold text-black"
-              : "border border-white bg-white font-medium text-dark-gray hover:bg-gray-50"
-            }`}
+            className={`
+              h-11
+              ${
+                category === "Regular/Satuan" ?
+                  "border border-border bg-dark-gray font-semibold text-black"
+                : "border border-white bg-white font-medium text-dark-gray hover:bg-gray-50"
+              }
+            `}
           >
             Tiket Regular/Satuan
           </Button>
         </div>
 
-        {/* TAMBAH */}
+        {/* TAMBAH TIKET */}
 
         <Button
+          type="button"
           variant="primary"
           size="sm"
           className="h-11 font-semibold"
@@ -133,9 +278,9 @@ export default function AdminTicketList({ onDelete }: AdminTicketListProps) {
         </Button>
       </div>
 
-      {/* ================================= */}
+      {/* ====================================================== */}
       {/* LOADING */}
-      {/* ================================= */}
+      {/* ====================================================== */}
 
       {loading && (
         <div className="py-10 text-center text-sm text-dark-gray">
@@ -143,9 +288,9 @@ export default function AdminTicketList({ onDelete }: AdminTicketListProps) {
         </div>
       )}
 
-      {/* ================================= */}
-      {/* DATA */}
-      {/* ================================= */}
+      {/* ====================================================== */}
+      {/* LIST TICKET */}
+      {/* ====================================================== */}
 
       {!loading && data.length > 0 && (
         <div
@@ -162,22 +307,41 @@ export default function AdminTicketList({ onDelete }: AdminTicketListProps) {
             <TicketCard
               key={ticket.id}
               ticket={ticket}
-              onEdit={(ticket) => navigate(`/admin/ticket/edit/${ticket.id}`)}
-              onDelete={onDelete}
+              itemTickets={itemTickets}
+              onEdit={(ticket) => {
+                if (ticket.category === "Paket Hemat") {
+                  navigate(`/admin/ticket/edit-package/${ticket.id}`);
+                  return;
+                }
+
+                navigate(`/admin/ticket/edit/${ticket.id}`);
+              }}
+              onDelete={handleOpenDeleteModal}
             />
           ))}
         </div>
       )}
 
-      {/* ================================= */}
-      {/* EMPTY */}
-      {/* ================================= */}
+      {/* ====================================================== */}
+      {/* EMPTY STATE */}
+      {/* ====================================================== */}
 
       {!loading && data.length === 0 && (
         <div className="py-10 text-center text-sm text-dark-gray">
           Belum ada tiket pada kategori ini.
         </div>
       )}
+
+      {/* ====================================================== */}
+      {/* DELETE MODAL */}
+      {/* ====================================================== */}
+
+      <DeleteTicketModal
+        open={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        ticket={selectedTicket}
+        onConfirm={handleDeleteTicket}
+      />
     </div>
   );
 }

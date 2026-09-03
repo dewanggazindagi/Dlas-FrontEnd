@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useEffect, useState } from "react";
-import type { FormEvent, ReactNode } from "react";
-import { ArrowLeft, ChevronDown, Plus, Trash2, Upload } from "lucide-react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+
+import { ArrowLeft, Plus, Trash2, Upload } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AdminLayout from "../../components/layout/Admin/AdminLayout";
@@ -11,37 +11,52 @@ import Button from "../../components/ui/Button";
 
 import { getTicketById, updateTicket } from "../../services/api/ticketApi";
 
-interface TicketForm {
-  name: string;
-  weekdayPrice: string;
-  weekendPrice: string;
-  status: string;
-  description: string;
-  terms: string[];
-  images: string[];
-}
+import { mapTicketApiToTicket } from "../../services/api/ticketAdapter";
+
+import type { Ticket, TicketGambar } from "../../types/ticket";
 
 export default function EditTicket() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  const [form, setForm] = useState<TicketForm>({
-    name: "",
-    weekdayPrice: "",
-    weekendPrice: "",
-    status: "",
-    description: "",
-    terms: [""],
-    images: [],
-  });
+  /* =========================================================
+     STATE
+  ========================================================= */
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // ==========================================
-  // AMBIL DATA TIKET
-  // ==========================================
+  const [namaTiket, setNamaTiket] = useState("");
+  const [hargaWeekdays, setHargaWeekdays] = useState("");
+  const [hargaWeekend, setHargaWeekend] = useState("");
+  const [status, setStatus] = useState("Tiket Aktif");
+  const [deskripsi, setDeskripsi] = useState("");
+
+  const [ketentuan, setKetentuan] = useState<string[]>([""]);
+
+  /*
+   * GAMBAR LAMA
+   *
+   * Tetap berupa TicketGambar[] karena data dari BE:
+   *
+   * {
+   *   id: "...",
+   *   urlGambar: "https://..."
+   * }
+   */
+  const [existingImages, setExistingImages] = useState<TicketGambar[]>([]);
+
+  /*
+   * GAMBAR BARU
+   *
+   * File yang dipilih user tetapi belum dikirim ke BE.
+   */
+  const [newImages, setNewImages] = useState<File[]>([]);
+
+  /* =========================================================
+     AMBIL DETAIL TIKET
+  ========================================================= */
 
   useEffect(() => {
     if (!id) {
@@ -57,90 +72,91 @@ export default function EditTicket() {
 
         const response = await getTicketById(id);
 
-        console.log("DETAIL TIKET:", response);
-
         /*
          * Beberapa API mengembalikan:
          *
          * response.data
          *
-         * atau langsung:
+         * sedangkan sebagian langsung:
          *
          * response
-         *
          */
+        const rawData = response?.data ?? response;
 
-        const ticket = response?.data ?? response;
+        console.log("=== DETAIL TIKET ===");
+        console.log("RAW DATA:", rawData);
 
-        setForm({
-          name: ticket.namaTiket ?? "",
+        /*
+         * Adapter hanya digunakan untuk data umum tiket.
+         */
+        const ticket: Ticket = mapTicketApiToTicket(rawData);
 
-          weekdayPrice:
-            ticket.hargaWeekdays != null ? String(ticket.hargaWeekdays) : "",
+        console.log("HASIL ADAPTER:", ticket);
 
-          weekendPrice:
-            ticket.hargaWeekend != null ? String(ticket.hargaWeekend) : "",
+        /* =========================
+           DATA TIKET
+        ========================= */
 
-          status: ticket.status ?? "",
+        setNamaTiket(ticket.name ?? "");
 
-          description: ticket.deskripsi ?? "",
-
-          terms:
-            Array.isArray(ticket.ketentuan) && ticket.ketentuan.length > 0 ?
-              ticket.ketentuan.map((item: any) => {
-                /*
-                 * Jika API mengembalikan:
-                 *
-                 * { deskripsi: "..." }
-                 *
-                 * ambil deskripsi.
-                 *
-                 * Jika langsung string,
-                 * gunakan string tersebut.
-                 */
-                if (typeof item === "string") {
-                  return item;
-                }
-
-                return item?.deskripsi ?? "";
-              })
-            : [""],
-
-          images:
-            Array.isArray(ticket.gambar) ?
-              ticket.gambar
-                .map((item: any) => {
-                  /*
-                   * API bisa mengembalikan:
-                   *
-                   * "https://..."
-                   *
-                   * atau:
-                   *
-                   * { url: "https://..." }
-                   *
-                   * atau:
-                   *
-                   * { gambar: "https://..." }
-                   */
-
-                  if (typeof item === "string") {
-                    return item;
-                  }
-
-                  return item?.url ?? item?.gambar ?? "";
-                })
-                .filter((image: string) => image.trim() !== "")
-            : [],
-        });
-      } catch (error: any) {
-        console.error("GAGAL MENGAMBIL DETAIL TIKET:", error);
-
-        console.error("ERROR RESPONSE:", error?.response?.data);
-
-        setError(
-          error?.response?.data?.message || "Gagal mengambil data tiket.",
+        setHargaWeekdays(
+          ticket.weekdayPrice != null ? String(ticket.weekdayPrice) : "",
         );
+
+        setHargaWeekend(
+          ticket.weekendPrice != null ? String(ticket.weekendPrice) : "",
+        );
+
+        setStatus(ticket.status ?? "Tiket Aktif");
+
+        setDeskripsi(ticket.description ?? "");
+
+        /* =========================
+           KETENTUAN
+        ========================= */
+
+        const ticketKetentuan =
+          Array.isArray(rawData?.ketentuan) ?
+            [...rawData.ketentuan]
+              .sort(
+                (a: any, b: any) =>
+                  Number(a?.urutan ?? 0) - Number(b?.urutan ?? 0),
+              )
+              .map((item: any) => item?.deskripsi ?? item?.description ?? "")
+              .filter((item: string) => item.trim() !== "")
+          : [];
+
+        setKetentuan(ticketKetentuan.length > 0 ? ticketKetentuan : [""]);
+
+        /* =========================
+           GAMBAR LAMA
+        ========================= */
+
+        const oldImages: TicketGambar[] =
+          Array.isArray(rawData?.gambar) ?
+            rawData.gambar
+              .filter((image: any) => image?.urlGambar)
+              .map((image: any) => ({
+                id: image.id,
+                urlGambar: image.urlGambar,
+              }))
+          : [];
+
+        console.log("GAMBAR LAMA DARI BE:", oldImages);
+
+        setExistingImages(oldImages);
+
+        /*
+         * Pastikan setiap kali halaman edit dibuka,
+         * gambar baru dikosongkan.
+         */
+        setNewImages([]);
+      } catch (err: any) {
+        console.error("Gagal mengambil data tiket:", err);
+
+        console.error("ERROR RESPONSE:", err?.response?.data);
+
+        setError(err?.response?.data?.message ?? "Gagal mengambil data tiket.");
       } finally {
         setLoading(false);
       }
@@ -149,74 +165,99 @@ export default function EditTicket() {
     fetchTicket();
   }, [id]);
 
-  // ==========================================
-  // CHANGE FORM
-  // ==========================================
+  /* =========================================================
+     KETENTUAN
+  ========================================================= */
 
-  const handleChange = (field: keyof TicketForm, value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleAddKetentuan = () => {
+    setKetentuan((prev) => [...prev, ""]);
   };
 
-  // ==========================================
-  // KETENTUAN
-  // ==========================================
-
-  const handleAddTerm = () => {
-    setForm((prev) => ({
-      ...prev,
-      terms: [...prev.terms, ""],
-    }));
+  const handleChangeKetentuan = (index: number, value: string) => {
+    setKetentuan((prev) =>
+      prev.map((item, itemIndex) => (itemIndex === index ? value : item)),
+    );
   };
 
-  const handleTermChange = (index: number, value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      terms: prev.terms.map((term, i) => (i === index ? value : term)),
-    }));
-  };
+  const handleRemoveKetentuan = (index: number) => {
+    setKetentuan((prev) => {
+      const result = prev.filter((_, itemIndex) => itemIndex !== index);
 
-  const handleRemoveTerm = (index: number) => {
-    setForm((prev) => {
-      const newTerms = prev.terms.filter((_, i) => i !== index);
-
-      return {
-        ...prev,
-        terms: newTerms.length > 0 ? newTerms : [""],
-      };
+      return result.length > 0 ? result : [""];
     });
   };
 
-  // ==========================================
-  // GAMBAR
-  // ==========================================
+  /* =========================================================
+     GAMBAR BARU
+  ========================================================= */
 
-  const handleAddImage = () => {
-    setForm((prev) => ({
-      ...prev,
-      images: [...prev.images, ""],
-    }));
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+
+    if (files.length === 0) {
+      return;
+    }
+
+    console.log("GAMBAR BARU DIPILIH:", files);
+
+    setNewImages((prev) => [...prev, ...files]);
+
+    /*
+     * Supaya file yang sama bisa dipilih
+     * kembali setelah dihapus.
+     */
+    event.target.value = "";
   };
 
-  const handleImageChange = (index: number, value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      images: prev.images.map((image, i) => (i === index ? value : image)),
-    }));
+  /* =========================================================
+     HAPUS GAMBAR LAMA DARI TAMPILAN
+  ========================================================= */
+
+  const handleRemoveExistingImage = (imageId: string) => {
+    setExistingImages((prev) => prev.filter((image) => image.id !== imageId));
   };
 
-  const handleRemoveImage = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
+  /* =========================================================
+     HAPUS GAMBAR BARU
+  ========================================================= */
+
+  const handleRemoveNewImage = (index: number) => {
+    setNewImages((prev) =>
+      prev.filter((_, imageIndex) => imageIndex !== index),
+    );
   };
 
-  // ==========================================
-  // SUBMIT UPDATE
-  // ==========================================
+  /* =========================================================
+     VALIDASI
+  ========================================================= */
+
+  const validateForm = (): string => {
+    if (!namaTiket.trim()) {
+      return "Nama tiket wajib diisi.";
+    }
+
+    if (!hargaWeekdays) {
+      return "Harga weekdays wajib diisi.";
+    }
+
+    if (!hargaWeekend) {
+      return "Harga weekend wajib diisi.";
+    }
+
+    if (!status) {
+      return "Status tiket wajib dipilih.";
+    }
+
+    if (!deskripsi.trim()) {
+      return "Deskripsi tiket wajib diisi.";
+    }
+
+    return "";
+  };
+
+  /* =========================================================
+     SUBMIT UPDATE
+  ========================================================= */
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -228,79 +269,150 @@ export default function EditTicket() {
 
     setError("");
 
-    // ========================================
-    // VALIDASI
-    // ========================================
+    /* =========================
+       VALIDASI
+    ========================= */
 
-    if (!form.name.trim()) {
-      setError("Nama tiket wajib diisi.");
+    const validationError = validateForm();
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
-
-    if (!form.weekdayPrice) {
-      setError("Harga weekdays wajib diisi.");
-      return;
-    }
-
-    if (!form.weekendPrice) {
-      setError("Harga weekend wajib diisi.");
-      return;
-    }
-
-    if (!form.status) {
-      setError("Status tiket wajib dipilih.");
-      return;
-    }
-
-    if (!form.description.trim()) {
-      setError("Deskripsi tiket wajib diisi.");
-      return;
-    }
-
-    setSaving(true);
 
     try {
-      const payload = {
-        namaTiket: form.name.trim(),
+      setSubmitting(true);
 
-        hargaWeekdays: Number(form.weekdayPrice),
+      /*
+       * ============================================
+       * FORM DATA
+       * ============================================
+       */
 
-        hargaWeekend: Number(form.weekendPrice),
+      const formData = new FormData();
 
-        deskripsi: form.description.trim(),
+      /* =========================
+         DATA TIKET
+      ========================= */
 
-        status: form.status,
+      formData.append("namaTiket", namaTiket.trim());
 
-        ketentuan: form.terms
-          .map((term) => term.trim())
-          .filter((term) => term !== ""),
+      formData.append("hargaWeekdays", String(Number(hargaWeekdays)));
 
-        gambar: form.images
-          .map((image) => image.trim())
-          .filter((image) => image !== ""),
-      };
+      formData.append("hargaWeekend", String(Number(hargaWeekend)));
 
-      console.log("DATA UPDATE TIKET:", payload);
+      formData.append("deskripsi", deskripsi.trim());
 
-      const response = await updateTicket(id, payload);
+      formData.append("status", status);
 
-      console.log("RESPONSE UPDATE TIKET:", response);
+      /* =========================
+         KETENTUAN
+      ========================= */
+
+      const validKetentuan = ketentuan
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+      validKetentuan.forEach((item) => {
+        formData.append("ketentuan", item);
+      });
+
+      /*
+       * ============================================
+       * GAMBAR
+       * ============================================
+       *
+       * PENTING:
+       *
+       * JANGAN kirim gambar lama sebagai File.
+       *
+       * Gambar lama sudah tersimpan di database.
+       *
+       * FE hanya mengirim File baru melalui:
+       *
+       * formData.append("gambar", file)
+       *
+       * ============================================
+       */
+
+      newImages.forEach((file) => {
+        formData.append("gambar", file);
+      });
+
+      /* =========================
+         DEBUG
+      ========================= */
+
+      console.log("================================");
+
+      console.log("=== UPDATE TIKET ===");
+
+      console.log("ID:", id);
+
+      console.log("NAMA:", namaTiket);
+
+      console.log("HARGA WEEKDAYS:", hargaWeekdays);
+
+      console.log("HARGA WEEKEND:", hargaWeekend);
+
+      console.log("STATUS:", status);
+
+      console.log("KETENTUAN:", validKetentuan);
+
+      console.log("GAMBAR LAMA YANG DIPERTAHANKAN:", existingImages);
+
+      console.log("GAMBAR BARU:", newImages);
+
+      console.log("JUMLAH GAMBAR LAMA:", existingImages.length);
+
+      console.log("JUMLAH GAMBAR BARU:", newImages.length);
+
+      /*
+       * Tampilkan isi FormData.
+       */
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log("FORM DATA:", key, value.name, value.type, value.size);
+        } else {
+          console.log("FORM DATA:", key, value);
+        }
+      }
+
+      console.log("================================");
+
+      /* =========================
+         UPDATE KE BE
+      ========================= */
+
+      await updateTicket(id, formData);
+
+      console.log("TIKET BERHASIL DIPERBARUI");
+
+      /* =========================
+         KEMBALI KE LIST
+      ========================= */
 
       navigate("/admin/ticket");
-    } catch (error: any) {
-      console.error("GAGAL UPDATE TIKET:", error);
+    } catch (err: any) {
+      console.error("Gagal update tiket:", err);
 
-      console.error("ERROR RESPONSE:", error?.response?.data);
+      console.error("ERROR RESPONSE:", err?.response?.data);
 
-      setError(error?.response?.data?.message || "Gagal memperbarui tiket.");
+      const message = err?.response?.data?.message;
+
+      if (Array.isArray(message)) {
+        setError(message.join(", "));
+      } else {
+        setError(message ?? "Gagal memperbarui tiket.");
+      }
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   };
 
-  // ==========================================
-  // LOADING
-  // ==========================================
+  /* =========================================================
+     LOADING
+  ========================================================= */
 
   if (loading) {
     return (
@@ -312,28 +424,24 @@ export default function EditTicket() {
     );
   }
 
-  // ==========================================
-  // UI
-  // ==========================================
-
   return (
     <AdminLayout>
-      <form onSubmit={handleSubmit} className="px-10 pb-10">
-        {/* ================================= */}
-        {/* HEADER */}
-        {/* ================================= */}
+      <form onSubmit={handleSubmit} className="grid gap-7 p-10">
+        {/* =================================================
+            HEADER
+        ================================================= */}
 
-        <div className="mb-8 flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/admin/ticket")}
             className="
               flex
               items-center
               gap-2
+              text-md
               font-semibold
               text-primary
-              transition
               hover:opacity-80
             "
           >
@@ -345,336 +453,468 @@ export default function EditTicket() {
             type="submit"
             variant="primary"
             size="sm"
-            disabled={saving}
-            className="
-              h-11
-              rounded-full
-              px-5
-            "
+            className="h-11 font-semibold"
+            disabled={submitting}
           >
-            {saving ? "Menyimpan..." : "Perbarui Tiket"}
+            {submitting ? "Memperbarui..." : "Perbarui Tiket"}
           </Button>
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
-          <FormField label="Nama Tiket">
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-              placeholder="Masukan nama tiket"
-              className="ticket-input"
-              required
-            />
-          </FormField>
+        {/* =================================================
+            FORM
+        ================================================= */}
 
-          <FormField label="Harga Weekdays">
-            <input
-              type="number"
-              min="0"
-              value={form.weekdayPrice}
-              onChange={(e) => handleChange("weekdayPrice", e.target.value)}
-              placeholder="Masukan harga weekdays"
-              className="ticket-input"
-              required
-            />
-          </FormField>
+        <div className="grid gap-7">
+          {/* =================================================
+              DATA UTAMA
+          ================================================= */}
 
-          <FormField label="Harga Weekend">
-            <input
-              type="number"
-              min="0"
-              value={form.weekendPrice}
-              onChange={(e) => handleChange("weekendPrice", e.target.value)}
-              placeholder="Masukan harga weekend"
-              className="ticket-input"
-              required
-            />
-          </FormField>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+            {/* NAMA */}
 
-          <FormField label="Status">
-            <div className="relative">
-              <select
-                value={form.status}
-                onChange={(e) => handleChange("status", e.target.value)}
+            <div>
+              <label className="mb-2 block text-sm text-dark-gray">
+                Nama Tiket
+              </label>
+
+              <input
+                type="text"
+                value={namaTiket}
+                onChange={(event) => setNamaTiket(event.target.value)}
                 className="
                   h-11
                   w-full
-                  appearance-none
+                  rounded-full
+                  border
+                  border-border
+                  px-4
+                  text-sm
+                  outline-none
+                  focus:border-primary
+                "
+                required
+              />
+            </div>
+
+            {/* WEEKDAYS */}
+
+            <div>
+              <label className="mb-2 block text-sm text-dark-gray">
+                Harga Weekdays
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                value={hargaWeekdays}
+                onChange={(event) => setHargaWeekdays(event.target.value)}
+                className="
+                  h-11
+                  w-full
+                  rounded-full
+                  border
+                  border-border
+                  px-4
+                  text-sm
+                  outline-none
+                  focus:border-primary
+                "
+                required
+              />
+            </div>
+
+            {/* WEEKEND */}
+
+            <div>
+              <label className="mb-2 block text-sm text-dark-gray">
+                Harga Weekend
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                value={hargaWeekend}
+                onChange={(event) => setHargaWeekend(event.target.value)}
+                className="
+                  h-11
+                  w-full
+                  rounded-full
+                  border
+                  border-border
+                  px-4
+                  text-sm
+                  outline-none
+                  focus:border-primary
+                "
+                required
+              />
+            </div>
+
+            {/* STATUS */}
+
+            <div>
+              <label className="mb-2 block text-sm text-dark-gray">
+                Status
+              </label>
+
+              <select
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+                className="
+                  h-11
+                  w-full
                   rounded-full
                   border
                   border-border
                   bg-white
                   px-4
                   text-sm
-                  text-gray-500
                   outline-none
                   focus:border-primary
                 "
-                required
               >
-                <option value="">Pilih Status</option>
-
                 <option value="Tiket Aktif">Aktif</option>
 
                 <option value="Tidak Aktif">Tidak Aktif</option>
               </select>
-
-              <ChevronDown
-                size={18}
-                className="
-                  pointer-events-none
-                  absolute
-                  right-4
-                  top-1/2
-                  -translate-y-1/2
-                  text-gray-500
-                "
-              />
             </div>
-          </FormField>
-        </div>
-
-        {/* ================================= */}
-        {/* DESKRIPSI */}
-        {/* ================================= */}
-
-        <div className="mt-5">
-          <label className="mb-2 block text-sm text-gray-500">
-            Tentang Tiket
-          </label>
-
-          <textarea
-            value={form.description}
-            onChange={(e) => handleChange("description", e.target.value)}
-            placeholder="Tambahkan deskripsi tiket"
-            className="
-              min-h-28.75
-              w-full
-              resize-none
-              rounded-2xl
-              border
-              border-border
-              p-4
-              text-sm
-              outline-none
-              placeholder:text-gray-400
-              focus:border-primary
-            "
-            required
-          />
-        </div>
-
-        {/* ================================= */}
-        {/* KETENTUAN */}
-        {/* ================================= */}
-
-        <div className="mt-5 border-t border-border pt-5">
-          <label className="mb-4 block text-sm text-gray-500">
-            Ketentuan Tiket
-          </label>
-
-          <div className="space-y-3">
-            {form.terms.map((term, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <input
-                  type="text"
-                  value={term}
-                  onChange={(e) => handleTermChange(index, e.target.value)}
-                  placeholder="Masukan poin ketentuan"
-                  className="
-                      h-11
-                      flex-1
-                      rounded-full
-                      border
-                      border-border
-                      px-4
-                      text-sm
-                      outline-none
-                      placeholder:text-gray-400
-                      focus:border-primary
-                    "
-                />
-
-                <button
-                  type="button"
-                  onClick={() => handleRemoveTerm(index)}
-                  className="
-                      text-danger
-                      transition
-                      hover:opacity-70
-                    "
-                >
-                  <Trash2 size={20} />
-                </button>
-              </div>
-            ))}
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddTerm}
-            startIcon={<Plus size={18} />}
-            className="
-              mt-3
-              h-10
-              rounded-full
-              px-4
-              font-semibold
-            "
-          >
-            Tambah Ketentuan
-          </Button>
-        </div>
+          {/* =================================================
+              DESKRIPSI
+          ================================================= */}
 
-        {/* ================================= */}
-        {/* GAMBAR */}
-        {/* ================================= */}
+          <div>
+            <label className="mb-2 block text-sm text-dark-gray">
+              Tentang Tiket
+            </label>
 
-        <div className="mt-5 border-t border-border pt-5">
-          <label className="mb-4 block text-sm text-gray-500">
-            Kumpulan Foto
-          </label>
+            <textarea
+              value={deskripsi}
+              onChange={(event) => setDeskripsi(event.target.value)}
+              rows={6}
+              className="
+                w-full
+                resize-none
+                rounded-2xl
+                border
+                border-border
+                px-4
+                py-3
+                text-sm
+                outline-none
+                focus:border-primary
+              "
+              required
+            />
+          </div>
 
-          <div className="flex flex-wrap gap-3">
-            {form.images.map((image, index) => (
-              <div
-                key={index}
-                className="
-                    relative
-                    w-64
-                    rounded-2xl
-                    border
-                    border-border
-                    bg-white
-                    p-4
-                  "
-              >
-                <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-                  <Upload size={18} />
-                  URL Gambar
+          {/* =================================================
+              KETENTUAN
+          ================================================= */}
+
+          <div>
+            <label className="mb-3 block text-sm text-dark-gray">
+              Ketentuan Tiket
+            </label>
+
+            <div className="grid gap-3">
+              {ketentuan.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={(event) =>
+                      handleChangeKetentuan(index, event.target.value)
+                    }
+                    placeholder="Masukkan ketentuan tiket"
+                    className="
+                        h-11
+                        w-full
+                        rounded-full
+                        border
+                        border-border
+                        px-4
+                        text-sm
+                        outline-none
+                        focus:border-primary
+                      "
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveKetentuan(index)}
+                    className="
+                        flex
+                        h-10
+                        w-10
+                        shrink-0
+                        items-center
+                        justify-center
+                        text-red-500
+                        hover:text-red-600
+                      "
+                    aria-label="Hapus ketentuan"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAddKetentuan}
+              className="
+                mt-3
+                flex
+                h-10
+                items-center
+                gap-2
+                rounded-full
+                border
+                border-black
+                px-4
+                text-sm
+                font-semibold
+                text-black
+                hover:bg-gray-50
+              "
+            >
+              <Plus size={17} />
+              Tambah Ketentuan
+            </button>
+          </div>
+
+          {/* =================================================
+              GAMBAR
+          ================================================= */}
+
+          <div>
+            <label className="mb-3 block text-sm text-dark-gray">
+              Kumpulan Foto
+            </label>
+
+            <div className="flex flex-wrap gap-3">
+              {/* ============================================
+                  BUTTON UPLOAD
+              ============================================ */}
+
+              <label
+                htmlFor="ticket-images"
+                className="
+                  flex
+                  h-28
+                  w-28
+                  cursor-pointer
+                  flex-col
+                  items-center
+                  justify-center
+                  rounded-xl
+                  border
+                  border-border
+                  bg-white
+                  transition
+                  hover:bg-gray-50
+                "
+              >
+                <Upload size={22} className="text-dark-gray" />
+
+                <span className="mt-2 text-xs text-dark-gray">
+                  Unggah gambar
+                </span>
 
                 <input
-                  type="url"
-                  value={image}
-                  onChange={(e) => handleImageChange(index, e.target.value)}
-                  placeholder="https://..."
+                  id="ticket-images"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </label>
+
+              {/* ============================================
+                  GAMBAR LAMA
+              ============================================ */}
+
+              {existingImages.map((image) => (
+                <div
+                  key={image.id}
                   className="
-                      h-11
-                      w-full
-                      rounded-full
+                      relative
+                      h-28
+                      w-28
+                      overflow-hidden
+                      rounded-xl
                       border
                       border-border
-                      px-4
-                      text-xs
-                      outline-none
-                      focus:border-primary
+                      bg-gray-100
                     "
-                />
-
-                {image && (
+                >
                   <img
-                    src={image}
-                    alt={`Gambar ${index + 1}`}
-                    className="
-                        mt-3
-                        h-32
-                        w-full
-                        rounded-xl
-                        object-cover
-                      "
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
+                    src={image.urlGambar}
+                    alt="Gambar tiket"
+                    className="h-full w-full object-cover"
+                    onLoad={() => {
+                      console.log("GAMBAR BERHASIL LOAD:", image.urlGambar);
+                    }}
+                    onError={(event) => {
+                      console.error("GAMBAR GAGAL LOAD:", image.urlGambar);
+
+                      console.error("CURRENT SRC:", event.currentTarget.src);
                     }}
                   />
-                )}
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleRemoveImage(index)}
-                  className="
-                      mt-3
-                      h-9
-                      w-full
-                      border-border
-                      text-danger
-                    "
-                  startIcon={false}
-                >
-                  <Trash2 size={15} />
-                  Hapus Gambar
-                </Button>
-              </div>
-            ))}
+                  {/* HAPUS GAMBAR LAMA */}
 
-            {/* TAMBAH GAMBAR */}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveExistingImage(image.id)}
+                    className="
+                        absolute
+                        right-1
+                        top-1
+                        flex
+                        h-7
+                        w-7
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-white
+                        text-red-500
+                        shadow
+                        hover:bg-red-50
+                      "
+                    aria-label="Hapus gambar lama"
+                  >
+                    <Trash2 size={14} />
+                  </button>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddImage}
+                  {/* LABEL LAMA */}
+
+                  <span
+                    className="
+                        absolute
+                        bottom-1
+                        left-1
+                        rounded
+                        bg-black/60
+                        px-2
+                        py-0.5
+                        text-[10px]
+                        text-white
+                      "
+                  >
+                    Lama
+                  </span>
+                </div>
+              ))}
+
+              {/* ============================================
+                  GAMBAR BARU
+              ============================================ */}
+
+              {newImages.map((file, index) => {
+                const previewUrl = URL.createObjectURL(file);
+
+                return (
+                  <div
+                    key={`${file.name}-${file.size}-${file.lastModified}-${index}`}
+                    className="
+                        relative
+                        h-28
+                        w-28
+                        overflow-hidden
+                        rounded-xl
+                        border
+                        border-border
+                        bg-gray-100
+                      "
+                  >
+                    <img
+                      src={previewUrl}
+                      alt={file.name}
+                      className="
+                          h-full
+                          w-full
+                          object-cover
+                        "
+                    />
+
+                    {/* HAPUS GAMBAR BARU */}
+
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveNewImage(index)}
+                      className="
+                          absolute
+                          right-1
+                          top-1
+                          flex
+                          h-7
+                          w-7
+                          items-center
+                          justify-center
+                          rounded-full
+                          bg-white
+                          text-red-500
+                          shadow
+                          hover:bg-red-50
+                        "
+                      aria-label="Hapus gambar baru"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+
+                    {/* LABEL BARU */}
+
+                    <span
+                      className="
+                          absolute
+                          bottom-1
+                          left-1
+                          rounded
+                          bg-black/60
+                          px-2
+                          py-0.5
+                          text-[10px]
+                          text-white
+                        "
+                    >
+                      Baru
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="mt-2 text-xs text-dark-gray">
+              JPG, PNG, atau WEBP. Gambar lama tetap ditampilkan selama belum
+              dihapus. Gambar baru akan dikirim saat tiket diperbarui.
+            </p>
+          </div>
+
+          {/* =================================================
+              ERROR
+          ================================================= */}
+
+          {error && (
+            <div
               className="
-                h-64
-                w-64
-                flex-col
-                gap-3
-                border-border
-                text-dark-gray
+                rounded-xl
+                bg-red-50
+                px-4
+                py-3
+                text-sm
+                text-red-500
               "
-              startIcon={false}
             >
-              <Upload size={28} />
-
-              <span className="text-sm">Tambahkan gambar</span>
-            </Button>
-          </div>
+              {error}
+            </div>
+          )}
         </div>
-
-        {/* ================================= */}
-        {/* ERROR */}
-        {/* ================================= */}
-
-        {error && (
-          <div
-            className="
-              mt-6
-              rounded-xl
-              bg-red-50
-              px-5
-              py-3
-              text-sm
-              text-red-500
-            "
-          >
-            {error}
-          </div>
-        )}
       </form>
     </AdminLayout>
-  );
-}
-
-// ==========================================
-// FORM FIELD
-// ==========================================
-
-interface FormFieldProps {
-  label: string;
-  children: ReactNode;
-}
-
-function FormField({ label, children }: FormFieldProps) {
-  return (
-    <div>
-      <label className="mb-2 block text-sm text-gray-500">{label}</label>
-
-      {children}
-    </div>
   );
 }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from "react";
-import type { FormEvent, ReactNode } from "react";
+import type { ChangeEvent, FormEvent, ReactNode } from "react";
 
 import { ArrowLeft, ChevronDown, Plus, Trash2, Upload } from "lucide-react";
 
@@ -13,10 +13,14 @@ import Button from "../../components/ui/Button";
 import { formatter } from "../../utils/formatter";
 
 import {
-  createTicket,
   createPackageTicket,
+  createTicket,
   getTickets,
 } from "../../services/api/ticketApi";
+
+// =========================================================
+// TYPE
+// =========================================================
 
 type TicketType = "package" | "regular";
 
@@ -28,21 +32,31 @@ interface TicketForm {
   description: string;
   selectedItems: string[];
   terms: string[];
-  images: string[];
+  images: File[];
 }
+
+interface RegularTicket {
+  id: string;
+  namaTiket: string;
+  hargaWeekdays: string | number;
+  jenisTiket: string;
+}
+
+type TextField =
+  | "name"
+  | "weekdayPrice"
+  | "weekendPrice"
+  | "status"
+  | "description";
+
+// =========================================================
+// COMPONENT
+// =========================================================
 
 export default function AddTicket() {
   const navigate = useNavigate();
 
-  // =====================================================
-  // TYPE
-  // =====================================================
-
   const [type, setType] = useState<TicketType>("regular");
-
-  // =====================================================
-  // FORM
-  // =====================================================
 
   const [form, setForm] = useState<TicketForm>({
     name: "",
@@ -52,12 +66,10 @@ export default function AddTicket() {
     description: "",
     selectedItems: [],
     terms: [""],
-    images: [""],
+    images: [],
   });
 
-  // =====================================================
-  // STATE
-  // =====================================================
+  const [regularTickets, setRegularTickets] = useState<RegularTicket[]>([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -65,34 +77,28 @@ export default function AddTicket() {
 
   const [error, setError] = useState("");
 
-  // =====================================================
-  // DATA TIKET SATUAN
-  // =====================================================
-
-  const [regularTickets, setRegularTickets] = useState<any[]>([]);
-
-  // =====================================================
-  // GET TIKET SATUAN
-  // =====================================================
+  // =======================================================
+  // LOAD TIKET SATUAN
+  // =======================================================
 
   useEffect(() => {
+    if (type !== "package") {
+      return;
+    }
+
     const fetchRegularTickets = async () => {
       try {
         setLoadingWahana(true);
+        setError("");
 
         const response = await getTickets();
-
-        console.log("TIKET SATUAN DARI API:", response);
 
         const data =
           Array.isArray(response) ? response : (response?.data ?? []);
 
-        // Hanya ambil tiket SATUAN
         const satuan = data.filter(
-          (ticket: any) => ticket.jenisTiket === "SATUAN",
+          (ticket: RegularTicket) => ticket.jenisTiket === "SATUAN",
         );
-
-        console.log("WAHANA SATUAN:", satuan);
 
         setRegularTickets(satuan);
       } catch (error) {
@@ -105,22 +111,22 @@ export default function AddTicket() {
     };
 
     fetchRegularTickets();
-  }, []);
+  }, [type]);
 
-  // =====================================================
-  // CHANGE FORM
-  // =====================================================
+  // =======================================================
+  // FORM CHANGE
+  // =======================================================
 
-  const handleChange = (field: keyof TicketForm, value: string) => {
+  const handleChange = (field: TextField, value: string) => {
     setForm((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  // =====================================================
-  // PILIH WAHANA
-  // =====================================================
+  // =======================================================
+  // TOGGLE WAHANA
+  // =======================================================
 
   const handleToggleItem = (id: string) => {
     setForm((prev) => {
@@ -137,9 +143,9 @@ export default function AddTicket() {
     });
   };
 
-  // =====================================================
+  // =======================================================
   // KETENTUAN
-  // =====================================================
+  // =======================================================
 
   const handleAddTerm = () => {
     setForm((prev) => ({
@@ -152,214 +158,178 @@ export default function AddTicket() {
     setForm((prev) => ({
       ...prev,
 
-      terms: prev.terms.map((term, i) => (i === index ? value : term)),
+      terms: prev.terms.map((term, itemIndex) =>
+        itemIndex === index ? value : term,
+      ),
     }));
   };
 
   const handleRemoveTerm = (index: number) => {
     setForm((prev) => {
-      const newTerms = prev.terms.filter((_, i) => i !== index);
+      const terms = prev.terms.filter((_, itemIndex) => itemIndex !== index);
 
       return {
         ...prev,
-
-        terms: newTerms.length > 0 ? newTerms : [""],
+        terms: terms.length > 0 ? terms : [""],
       };
     });
   };
 
-  // =====================================================
+  // =======================================================
   // GAMBAR
-  // =====================================================
+  // =======================================================
 
-  const handleAddImage = () => {
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+
+    if (!files?.length) {
+      return;
+    }
+
+    const selectedFiles = Array.from(files);
+
     setForm((prev) => ({
       ...prev,
 
-      images: [...prev.images, ""],
+      images: [...prev.images, ...selectedFiles],
     }));
-  };
 
-  const handleImageChange = (index: number, value: string) => {
-    setForm((prev) => ({
-      ...prev,
-
-      images: prev.images.map((image, i) => (i === index ? value : image)),
-    }));
+    // Supaya file yang sama
+    // bisa dipilih kembali.
+    event.target.value = "";
   };
 
   const handleRemoveImage = (index: number) => {
-    setForm((prev) => {
-      const newImages = prev.images.filter((_, i) => i !== index);
+    setForm((prev) => ({
+      ...prev,
 
-      return {
-        ...prev,
-
-        images: newImages.length > 0 ? newImages : [""],
-      };
-    });
+      images: prev.images.filter((_, imageIndex) => imageIndex !== index),
+    }));
   };
 
-  // =====================================================
+  // =======================================================
+  // VALIDASI
+  // =======================================================
+
+  const validateForm = (): string => {
+    if (!form.name.trim()) {
+      return "Nama tiket wajib diisi.";
+    }
+
+    if (!form.weekdayPrice) {
+      return "Harga weekdays wajib diisi.";
+    }
+
+    if (!form.weekendPrice) {
+      return "Harga weekend wajib diisi.";
+    }
+
+    if (!form.status) {
+      return "Status tiket wajib dipilih.";
+    }
+
+    if (!form.description.trim()) {
+      return "Deskripsi tiket wajib diisi.";
+    }
+
+    if (type === "package" && form.selectedItems.length === 0) {
+      return "Pilih minimal satu wahana untuk tiket paket.";
+    }
+
+    return "";
+  };
+
+  // =======================================================
   // SUBMIT
-  // =====================================================
+  // =======================================================
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setError("");
 
-    // ===================================================
-    // VALIDASI
-    // ===================================================
+    const validationError = validateForm();
 
-    if (!form.name.trim()) {
-      setError("Nama tiket wajib diisi.");
+    if (validationError) {
+      setError(validationError);
       return;
     }
-
-    if (!form.weekdayPrice) {
-      setError("Harga weekdays wajib diisi.");
-      return;
-    }
-
-    if (!form.weekendPrice) {
-      setError("Harga weekend wajib diisi.");
-      return;
-    }
-
-    if (!form.status) {
-      setError("Status tiket wajib dipilih.");
-      return;
-    }
-
-    if (!form.description.trim()) {
-      setError("Deskripsi tiket wajib diisi.");
-      return;
-    }
-
-    // ===================================================
-    // VALIDASI PAKET
-    // ===================================================
-
-    if (type === "package" && form.selectedItems.length === 0) {
-      setError("Pilih minimal satu wahana untuk tiket paket.");
-      return;
-    }
-
-    // ===================================================
-    // KETENTUAN
-    // ===================================================
-
-    const ketentuan = form.terms
-      .map((term) => term.trim())
-      .filter((term) => term !== "");
-
-    // ===================================================
-    // GAMBAR
-    // ===================================================
-
-    const gambar = form.images
-      .map((image) => image.trim())
-      .filter((image) => image !== "");
 
     setLoading(true);
 
     try {
-      // =================================================
+      const ketentuan = form.terms.map((term) => term.trim()).filter(Boolean);
+
+      const basePayload = {
+        namaTiket: form.name.trim(),
+
+        hargaWeekdays: Number(form.weekdayPrice),
+
+        hargaWeekend: Number(form.weekendPrice),
+
+        deskripsi: form.description.trim(),
+
+        status: form.status,
+
+        ketentuan,
+
+        // File[] langsung
+        gambar: form.images,
+      };
+
+      console.log("================================");
+
+      console.log("DATA TIKET:", basePayload);
+
+      // ===================================================
       // TIKET SATUAN
-      // =================================================
+      // ===================================================
 
       if (type === "regular") {
-        const payload = {
-          namaTiket: form.name.trim(),
+        const response = await createTicket(basePayload);
 
-          hargaWeekdays: Number(form.weekdayPrice),
-
-          hargaWeekend: Number(form.weekendPrice),
-
-          deskripsi: form.description.trim(),
-
-          status: form.status,
-
-          ketentuan,
-
-          gambar,
-        };
-
-        console.log("DATA TIKET SATUAN:", payload);
-
-        const response = await createTicket(payload);
-
-        console.log("RESPONSE TIKET SATUAN:", response);
-
-        navigate("/admin/ticket");
-
-        return;
+        console.log("TIKET SATUAN BERHASIL DIBUAT:", response);
       }
 
-      // =================================================
+      // ===================================================
       // TIKET PAKET
-      // =================================================
+      // ===================================================
+      else {
+        const response = await createPackageTicket({
+          ...basePayload,
 
-      if (type === "package") {
-        const payload = {
-          namaTiket: form.name.trim(),
-
-          hargaWeekdays: Number(form.weekdayPrice),
-
-          hargaWeekend: Number(form.weekendPrice),
-
-          deskripsi: form.description.trim(),
-
-          status: form.status,
-
-          ketentuan,
-
-          gambar,
-
-          // ID tiket SATUAN
-          // yang dipilih
           wahanaIds: form.selectedItems,
-        };
+        });
 
-        console.log("DATA TIKET PAKET:", payload);
-
-        const response = await createPackageTicket(payload);
-
-        console.log("RESPONSE TIKET PAKET:", response);
-
-        navigate("/admin/ticket");
-
-        return;
+        console.log("TIKET PAKET BERHASIL DIBUAT:", response);
       }
-    } catch (error: any) {
-      console.error("GAGAL MENAMBAHKAN TIKET:", error);
 
-      console.error("ERROR RESPONSE:", error?.response?.data);
+      navigate("/admin/ticket");
+    } catch (error: any) {
+      console.error("Gagal menambahkan tiket:", error);
+
+      console.error("Error response:", error?.response?.data);
 
       const message = error?.response?.data?.message;
 
       setError(
         Array.isArray(message) ?
           message.join(", ")
-        : message || "Gagal menambahkan tiket.",
+        : message || error?.message || "Gagal menambahkan tiket.",
       );
     } finally {
       setLoading(false);
     }
   };
 
-  // =====================================================
+  // =======================================================
   // RETURN
-  // =====================================================
+  // =======================================================
 
   return (
     <AdminLayout>
       <form onSubmit={handleSubmit} className="px-10 pb-10">
-        {/* ================================================= */}
         {/* HEADER */}
-        {/* ================================================= */}
 
         <div className="mb-8 flex items-center justify-between">
           <button
@@ -394,9 +364,7 @@ export default function AddTicket() {
           </Button>
         </div>
 
-        {/* ================================================= */}
         {/* TYPE */}
-        {/* ================================================= */}
 
         <div
           className="
@@ -440,16 +408,14 @@ export default function AddTicket() {
           </Button>
         </div>
 
-        {/* ================================================= */}
-        {/* FORM UTAMA */}
-        {/* ================================================= */}
+        {/* DATA UTAMA */}
 
         <div className="mt-7 grid grid-cols-4 gap-3">
           <FormField label="Nama Tiket">
             <input
               type="text"
               value={form.name}
-              onChange={(e) => handleChange("name", e.target.value)}
+              onChange={(event) => handleChange("name", event.target.value)}
               placeholder="Masukan nama tiket"
               className="ticket-input"
               required
@@ -461,7 +427,9 @@ export default function AddTicket() {
               type="number"
               min="0"
               value={form.weekdayPrice}
-              onChange={(e) => handleChange("weekdayPrice", e.target.value)}
+              onChange={(event) =>
+                handleChange("weekdayPrice", event.target.value)
+              }
               placeholder="Masukan harga weekdays"
               className="ticket-input"
               required
@@ -473,7 +441,9 @@ export default function AddTicket() {
               type="number"
               min="0"
               value={form.weekendPrice}
-              onChange={(e) => handleChange("weekendPrice", e.target.value)}
+              onChange={(event) =>
+                handleChange("weekendPrice", event.target.value)
+              }
               placeholder="Masukan harga weekend"
               className="ticket-input"
               required
@@ -484,7 +454,7 @@ export default function AddTicket() {
             <div className="relative">
               <select
                 value={form.status}
-                onChange={(e) => handleChange("status", e.target.value)}
+                onChange={(event) => handleChange("status", event.target.value)}
                 className="
                   h-11
                   w-full
@@ -523,9 +493,7 @@ export default function AddTicket() {
           </FormField>
         </div>
 
-        {/* ================================================= */}
         {/* DESKRIPSI */}
-        {/* ================================================= */}
 
         <div className="mt-5">
           <label className="mb-2 block text-sm text-gray-500">
@@ -534,7 +502,9 @@ export default function AddTicket() {
 
           <textarea
             value={form.description}
-            onChange={(e) => handleChange("description", e.target.value)}
+            onChange={(event) =>
+              handleChange("description", event.target.value)
+            }
             placeholder="Tambahkan deskripsi tiket"
             className="
               min-h-28.75
@@ -553,10 +523,7 @@ export default function AddTicket() {
           />
         </div>
 
-        {/* ================================================= */}
-        {/* PILIH WAHANA */}
-        {/* HANYA MUNCUL UNTUK PAKET */}
-        {/* ================================================= */}
+        {/* WAHANA */}
 
         {type === "package" && (
           <div className="mt-5 border-t border-border pt-5">
@@ -572,23 +539,17 @@ export default function AddTicket() {
                 border-border
               "
             >
-              {/* LOADING */}
-
               {loadingWahana && (
                 <div className="px-4 py-5 text-sm text-gray-500">
                   Memuat daftar wahana...
                 </div>
               )}
 
-              {/* EMPTY */}
-
               {!loadingWahana && regularTickets.length === 0 && (
                 <div className="px-4 py-5 text-sm text-gray-500">
                   Belum ada tiket satuan yang dapat dimasukkan ke paket.
                 </div>
               )}
-
-              {/* DATA */}
 
               {!loadingWahana &&
                 regularTickets.map((ticket) => {
@@ -627,7 +588,7 @@ export default function AddTicket() {
                         </p>
 
                         <p className="mt-0.5 text-xs text-gray-500">
-                          Harga tiket satuan :{" "}
+                          Harga tiket satuan:{" "}
                           {formatter.rupiah(Number(ticket.hargaWeekdays))}
                         </p>
                       </div>
@@ -635,8 +596,6 @@ export default function AddTicket() {
                   );
                 })}
             </div>
-
-            {/* JUMLAH PILIHAN */}
 
             {form.selectedItems.length > 0 && (
               <p className="mt-2 text-xs text-gray-500">
@@ -646,9 +605,7 @@ export default function AddTicket() {
           </div>
         )}
 
-        {/* ================================================= */}
         {/* KETENTUAN */}
-        {/* ================================================= */}
 
         <div className="mt-5 border-t border-border pt-5">
           <label className="mb-4 block text-sm text-gray-500">
@@ -661,7 +618,9 @@ export default function AddTicket() {
                 <input
                   type="text"
                   value={term}
-                  onChange={(e) => handleTermChange(index, e.target.value)}
+                  onChange={(event) =>
+                    handleTermChange(index, event.target.value)
+                  }
                   placeholder="Masukan poin ketentuan"
                   className="
                       h-11
@@ -710,9 +669,7 @@ export default function AddTicket() {
           </Button>
         </div>
 
-        {/* ================================================= */}
         {/* GAMBAR */}
-        {/* ================================================= */}
 
         <div className="mt-5 border-t border-border pt-5">
           <label className="mb-4 block text-sm text-gray-500">
@@ -720,106 +677,96 @@ export default function AddTicket() {
           </label>
 
           <div className="flex flex-wrap gap-3">
+            {/* UPLOAD */}
+
+            <label
+              className="
+                flex
+                h-40
+                w-40
+                cursor-pointer
+                flex-col
+                items-center
+                justify-center
+                rounded-2xl
+                border
+                border-border
+                bg-white
+                transition
+                hover:bg-gray-50
+              "
+            >
+              <Upload size={28} className="text-gray-500" />
+
+              <span className="mt-3 text-sm text-gray-500">Unggah gambar</span>
+
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+                onChange={handleImageChange}
+              />
+            </label>
+
+            {/* PREVIEW GAMBAR */}
+
             {form.images.map((image, index) => (
               <div
-                key={index}
+                key={`${image.name}-${image.lastModified}-${index}`}
                 className="
                     relative
-                    w-64
+                    h-40
+                    w-40
+                    overflow-hidden
                     rounded-2xl
                     border
                     border-border
-                    bg-white
-                    p-4
+                    bg-gray-100
                   "
               >
-                <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-                  <Upload size={18} />
-                  URL Gambar
-                </div>
-
-                <input
-                  type="url"
-                  value={image}
-                  onChange={(e) => handleImageChange(index, e.target.value)}
-                  placeholder="https://..."
+                <img
+                  src={URL.createObjectURL(image)}
+                  alt={`Gambar ${index + 1}`}
                   className="
-                      h-11
+                      h-full
                       w-full
-                      rounded-full
-                      border
-                      border-border
-                      px-4
-                      text-xs
-                      outline-none
-                      focus:border-primary
+                      object-cover
                     "
                 />
 
-                {image && (
-                  <img
-                    src={image}
-                    alt={`Gambar ${index + 1}`}
-                    className="
-                        mt-3
-                        h-32
-                        w-full
-                        rounded-xl
-                        object-cover
-                      "
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                )}
-
-                <Button
+                <button
                   type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={() => handleRemoveImage(index)}
                   className="
-                      mt-3
-                      h-9
-                      w-full
-                      border-border
+                      absolute
+                      right-2
+                      top-2
+                      flex
+                      h-7
+                      w-7
+                      items-center
+                      justify-center
+                      rounded-full
+                      bg-white
                       text-danger
+                      shadow
+                      transition
+                      hover:bg-gray-100
                     "
-                  startIcon={false}
                 >
-                  <Trash2 size={15} />
-                  Hapus Gambar
-                </Button>
+                  <Trash2 size={14} />
+                </button>
               </div>
             ))}
-
-            {/* TAMBAH GAMBAR */}
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddImage}
-              className="
-                h-64
-                w-64
-                flex-col
-                gap-3
-                border-border
-                text-dark-gray
-              "
-              startIcon={false}
-            >
-              <Upload size={28} />
-
-              <span className="text-sm">Tambahkan gambar</span>
-            </Button>
           </div>
+
+          <p className="mt-2 text-xs text-gray-400">
+            Format JPG, PNG, atau WEBP.
+          </p>
         </div>
 
-        {/* ================================================= */}
         {/* ERROR */}
-        {/* ================================================= */}
 
         {error && (
           <div
@@ -841,9 +788,9 @@ export default function AddTicket() {
   );
 }
 
-// =====================================================
+// =========================================================
 // FORM FIELD
-// =====================================================
+// =========================================================
 
 interface FormFieldProps {
   label: string;
