@@ -2,6 +2,10 @@ import type { Ticket } from "../../types/ticket";
 import ticketDinoland from "../../assets/images/ticket-dinoland.png";
 import ticketDlasZoo from "../../assets/images/ticket-dlaszoo.png";
 import ticketTamanSalju from "../../assets/images/ticket-tamansalju.png";
+import gallery1 from "../../assets/images/gallery-1.png";
+import gallery2 from "../../assets/images/gallery-2.jpg";
+import gallery3 from "../../assets/images/gallery-3.png";
+import gallery4 from "../../assets/images/gallery-4.jpg";
 
 export const ticketData: Ticket[] = [
   {
@@ -9,7 +13,7 @@ export const ticketData: Ticket[] = [
     name: "Dino Land",
     description: "Jelajahi dunia dinosaurus dengan replika raksasa yang seru.",
     price: 10000,
-    image: ticketDinoland,
+    images: [ticketDinoland, gallery3, gallery1],
     category: "Regular/Satuan",
   },
   {
@@ -17,7 +21,7 @@ export const ticketData: Ticket[] = [
     name: "D'Las Zoo",
     description: "Area mini zoo untuk berinteraksi dengan berbagai hewan lucu.",
     price: 20000,
-    image: ticketDlasZoo,
+    images: [ticketDlasZoo, gallery1, gallery2],
     category: "Regular/Satuan",
   },
   {
@@ -25,7 +29,7 @@ export const ticketData: Ticket[] = [
     name: "Taman Salju",
     description: "Rasakan dinginnya salju buatan dalam wahana musim dingin.",
     price: 20000,
-    image: ticketTamanSalju,
+    images: [ticketTamanSalju, gallery4, gallery2],
     category: "Regular/Satuan",
   },
   {
@@ -33,7 +37,7 @@ export const ticketData: Ticket[] = [
     name: "Sepeda Air",
     description: "Naik sepeda air sambil nikmati udara dan pemandangan alam.",
     price: 10000,
-    image: ticketDinoland,
+    images: [ticketDinoland, gallery2, gallery3],
     category: "Regular/Satuan",
   },
   {
@@ -41,7 +45,7 @@ export const ticketData: Ticket[] = [
     name: "Kolam Renang",
     description: "Tempat yang pas untuk bermain air dan bersantai.",
     price: 10000,
-    image: ticketDinoland,
+    images: [ticketDinoland, gallery4, gallery1],
     category: "Regular/Satuan",
   },
   {
@@ -49,7 +53,7 @@ export const ticketData: Ticket[] = [
     name: "ATV Bike",
     description: "Nikmati adrenalin di lintasan ATV yang seru.",
     price: 10000,
-    image: ticketDinoland,
+    images: [ticketDinoland, gallery3, gallery4],
     category: "Regular/Satuan",
   },
   {
@@ -57,7 +61,7 @@ export const ticketData: Ticket[] = [
     name: "Rainbow Slide",
     description: "Meluncur di seluncuran warna-warni yang menyenangkan.",
     price: 20000,
-    image: ticketDinoland,
+    images: [ticketDinoland, gallery1, gallery3],
     category: "Regular/Satuan",
   },
 ];

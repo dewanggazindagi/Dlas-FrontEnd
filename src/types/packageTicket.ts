@@ -3,6 +3,6 @@ export interface PackageTicket {
   name: string;
   description: string;
   price: number;
-  image: string;
+  images: string[];
   includedRides: string[];
 }

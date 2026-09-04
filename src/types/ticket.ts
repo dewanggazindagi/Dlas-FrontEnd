@@ -3,6 +3,6 @@ export interface Ticket {
   name: string;
   description: string;
   price: number;
-  image: string;
+  images: string[];
   category: "Regular/Satuan" | "Paket Hemat";
 }
