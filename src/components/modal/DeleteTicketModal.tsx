@@ -57,7 +57,7 @@ export default function DeleteTicketModal({
 
           {/* NAMA TIKET */}
           <p className="mt-3 px-2 text-sm font-semibold text-black">
-            "{ticket.name}"
+            "{ticket.namaTiket}"
           </p>
         </div>
 
