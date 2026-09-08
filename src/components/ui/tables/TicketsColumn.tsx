@@ -1,40 +1,38 @@
 import type { TableColumn } from "./types";
-import { transactionData } from "../../../services/data/transactionData";
 import { formatter } from "../../../utils/formatter";
+import type { TopTicket } from "../../../types/dashboard";
 
-type Ticket = (typeof transactionData)[number];
-
-export const columns: TableColumn<Ticket>[] = [
+export const columns: TableColumn<TopTicket>[] = [
   {
-    key: "id",
+    key: "idTiket",
     header: "ID Tiket",
     width: "120px",
   },
   {
-    key: "ticket",
+    key: "namaTiket", 
     header: "Nama Tiket",
   },
   {
-    key: "category",
+    key: "kategori", 
     header: "Kategori",
   },
   {
-    key: "sold",
+    key: "tiketTerjual",
     header: "Tiket Terjual",
   },
   {
-    key: "nonCash",
+    key: "pendapatanNonTunai",
     header: "Pendapatan Non-Tunai",
-    render: (row) => formatter.rupiah(row.nonCash),
+    render: (row) => formatter.rupiah(row.pendapatanNonTunai), 
   },
   {
-    key: "cash",
+    key: "pendapatanTunai",
     header: "Pendapatan Tunai",
-    render: (row) => formatter.rupiah(row.cash),
+    render: (row) => formatter.rupiah(row.pendapatanTunai),
   },
   {
-    key: "total",
+    key: "totalPendapatan",
     header: "Total Pendapatan",
-    render: (row) => formatter.rupiah(row.total),
+    render: (row) => formatter.rupiah(row.totalPendapatan),
   },
 ];

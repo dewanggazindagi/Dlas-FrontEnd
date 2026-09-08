@@ -1,17 +1,18 @@
 import BaseTable from "../ui/tables/BaseTable";
 import { columns } from "../ui/tables/TicketsColumn";
-import { transactionData } from "../../services/data/transactionData";
+//import { transactionData } from "../../services/data/transactionData";
 import { useEffect, useState } from "react";
 import TableFilter from "../ui/tables/TableFilter";
 import TableSearch from "../ui/tables/TableSearch";
 import TablePagination from "../ui/tables/TablePagination";
 import usePagination from "../../hooks/usePagination";
+import type { TopTicket } from "../../types/dashboard";
 
-interface AdminTable {
-  data: typeof transactionData;
+interface AdminTableProps {
+  data: TopTicket[];
 }
 
-export default function AdminTable({ data }: AdminTable) {
+export default function AdminTable({ data }: AdminTableProps) {
   const [searchValue, setSearchValue] = useState("");
   const [sortBy, setSortBy] = useState("sold-desc");
   const sortOptions = [
@@ -31,20 +32,20 @@ export default function AdminTable({ data }: AdminTable) {
 
   const filteredData = data.filter(
     (item) =>
-      item.ticket.toLowerCase().includes(searchValue.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchValue.toLowerCase()),
+      item.namaTiket.toLowerCase().includes(searchValue.toLowerCase()) ||
+      item.kategori.toLowerCase().includes(searchValue.toLowerCase()),
   );
 
   const sortedData = [...filteredData].sort((a, b) => {
     switch (sortBy) {
       case "sold-desc":
-        return b.total - a.total;
+        return b.totalPendapatan - a.totalPendapatan;
 
       case "ticket-desc":
-        return b.sold - a.sold;
+        return b.tiketTerjual - a.tiketTerjual;
 
       case "alphabet":
-        return a.ticket.localeCompare(b.ticket);
+        return a.namaTiket.localeCompare(b.namaTiket);
 
       default:
         return 0;
@@ -53,6 +54,7 @@ export default function AdminTable({ data }: AdminTable) {
 
   const { currentData, currentPage, totalPages, setCurrentPage } =
     usePagination(sortedData, 5);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchValue, sortBy, setCurrentPage]);

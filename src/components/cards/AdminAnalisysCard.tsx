@@ -5,10 +5,11 @@ import DateFilter from "./DateFilter";
 import StatCard from "../ui/StatCard";
 
 import { formatter } from "../../utils/formatter";
-import type { Transaction } from "../../types/transaction";
+//import type { Transaction } from "../../types/transaction";
+import type { DashboardSummary } from "../../types/dashboard";
 
 interface Props {
-  data: Transaction[];
+  data: DashboardSummary | null;
   period: string;
   setPeriod: (value: string) => void;
 }
@@ -33,13 +34,10 @@ export default function AdminAnalisysCard({ data, period, setPeriod }: Props) {
     },
   ];
 
-  const totalRevenue = data.reduce((sum, item) => sum + item.total, 0);
-
-  const totalCash = data.reduce((sum, item) => sum + item.cash, 0);
-
-  const totalNonCash = data.reduce((sum, item) => sum + item.nonCash, 0);
-
-  const totalOnline = data.reduce((sum, item) => sum + item.online, 0);
+  const totalRevenue = data?.pendapatanPenjualanTiket || 0;
+  const totalCash = data?.penjualanTunai || 0;
+  const totalNonCash = data?.penjualanNonTunai || 0;
+  const totalOnline = data?.penjualanOnline || 0;
 
   return (
     <div>
