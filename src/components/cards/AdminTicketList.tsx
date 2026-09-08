@@ -76,6 +76,7 @@ export default function AdminTicketList() {
       {/* DELETE MODAL */}
       <DeleteTicketModal
         open={deleteModalOpen}
+        loading={loading}
         onClose={handleCloseDeleteModal}
         ticket={selectedTicket}
         onConfirm={handleDeleteConfirm}

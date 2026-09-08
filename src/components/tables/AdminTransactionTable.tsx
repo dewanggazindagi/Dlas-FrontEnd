@@ -10,26 +10,29 @@ import TransactionDetailModal from "../modal/TransactionDetailModal";
 
 import usePagination from "../../hooks/usePagination";
 
-import { transactionTableData } from "../../services/data/transactionTableData";
+import type { TransactionTable } from "../../types/transactionTable";
 import { filterTransactionByDate } from "../../utils/filterTransactionByDate";
 
 interface AdminTransactionTableProps {
-  data: typeof transactionTableData;
+  data: TransactionTable[];
+  loading: boolean;
 }
 
 export default function AdminTransactionTable({
   data,
+  loading,
 }: AdminTransactionTableProps) {
+  // Semua hook WAJIB di atas, sebelum return apa pun
   const [searchValue, setSearchValue] = useState("");
   const [status, setStatus] = useState("all");
   const [selectedDate, setSelectedDate] = useState<Date>();
 
   const [openDetail, setOpenDetail] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<
-    (typeof transactionTableData)[number] | null
-  >(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<TransactionTable | null>(null); // SATU transaksi, bukan array
 
-  const handleDetail = (transaction: (typeof transactionTableData)[number]) => {
+  const handleDetail = (transaction: TransactionTable) => {
+    // SATU transaksi
     setSelectedTransaction(transaction);
     setOpenDetail(true);
   };
@@ -37,27 +40,14 @@ export default function AdminTransactionTable({
   const columns = getTransactionColumns(handleDetail);
 
   const statusOptions = [
-    {
-      label: "Status",
-      value: "all",
-    },
-    {
-      label: "Dibayar",
-      value: "Dibayar",
-    },
-    {
-      label: "Menunggu",
-      value: "Menunggu",
-    },
-    {
-      label: "Dibatalkan",
-      value: "Dibatalkan",
-    },
+    { label: "Status", value: "all" },
+    { label: "Dibayar", value: "Dibayar" },
+    { label: "Menunggu", value: "Menunggu" },
+    { label: "Dibatalkan", value: "Dibatalkan" },
   ];
 
   const searchedData = data.filter((item) => {
     const keyword = searchValue.toLowerCase();
-
     return (
       item.id.toLowerCase().includes(keyword) ||
       item.ticket.toLowerCase().includes(keyword) ||
@@ -78,6 +68,23 @@ export default function AdminTransactionTable({
   useEffect(() => {
     setCurrentPage(1);
   }, [searchValue, status, selectedDate, setCurrentPage]);
+
+  // Early return SEKARANG aman, karena semua hook sudah dipanggil di atas
+  if (loading) {
+    return (
+      <div className="py-10 text-center text-sm text-dark-gray">
+        Memuat data transaksi...
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="py-10 text-center text-sm text-dark-gray">
+        Belum ada tiket pada kategori ini.
+      </div>
+    );
+  }
 
   return (
     <div>

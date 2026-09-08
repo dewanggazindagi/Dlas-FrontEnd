@@ -1,3 +1,4 @@
+// src/types/transaction.ts
 export type TransactionStatus =
   | "Menunggu"
   | "Dibayar"

@@ -4,27 +4,27 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import AdminLayout from "../../components/layout/Admin/AdminLayout";
-import Button from "../../components/ui/Button";
+import AdminLayout from "../../../components/layout/Admin/AdminLayout";
+import Button from "../../../components/ui/Button";
 
 import {
   createPackageTicket,
   createTicket,
-} from "../../services/api/ticketApi";
+} from "../../../services/api/ticketApi";
 
-import { useTicketForm } from "../../hooks/useTicketForm";
-import { useTicketValidation } from "../../hooks/useTicketValidation";
-import { useWahanaSelection } from "../../hooks/useWahanaSelection";
+import { useTicketForm } from "../../../hooks/useTicketForm";
+import { useTicketValidation } from "../../../hooks/useTicketValidation";
+import { useWahanaSelection } from "../../../hooks/useWahanaSelection";
 
-import TicketTypeSelector from "../../components/ticket/TicketTypeSelector";
-import TicketBasicInfo from "../../components/ticket/TicketBasicInfo";
-import TicketDescription from "../../components/ticket/TicketDescription";
-import WahanaSelection from "../../components/ticket/WahanaSelection";
-import TermsManagement from "../../components/ticket/TermsManagement";
-import ImageUpload from "../../components/ticket/ImageUpload";
-import ErrorAlert from "../../components/ticket/ErrorAlert";
+import TicketTypeSelector from "../../../components/ticket/TicketTypeSelector";
+import TicketBasicInfo from "../../../components/ticket/TicketBasicInfo";
+import TicketDescription from "../../../components/ticket/TicketDescription";
+import WahanaSelection from "../../../components/ticket/WahanaSelection";
+import TermsManagement from "../../../components/ticket/TermsManagement";
+import ImageUpload from "../../../components/ticket/ImageUpload";
+import ErrorAlert from "../../../components/ticket/ErrorAlert";
 
-import type { TicketType } from "../../types/ticket";
+import type { TicketType } from "../../../types/ticket";
 
 /**
  * Page untuk menambahkan tiket baru

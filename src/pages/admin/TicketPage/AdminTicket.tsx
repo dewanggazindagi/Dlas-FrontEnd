@@ -1,8 +1,8 @@
-import AdminLayout from "../../components/layout/Admin/AdminLayout";
-import AdminTicketSummaryCard from "../../components/cards/AdminTicketSummaryCard";
-import AdminTicketList from "../../components/cards/AdminTicketList";
+import AdminLayout from "../../../components/layout/Admin/AdminLayout";
+import AdminTicketSummaryCard from "../../../components/cards/AdminTicketSummaryCard";
+import AdminTicketList from "../../../components/cards/AdminTicketList";
 
-import { useTicketsData } from "../../hooks/useTicketsData";
+import { useTicketsData } from "../../../hooks/useTicketsData";
 
 /**
  * Page untuk admin melihat dan manage tiket

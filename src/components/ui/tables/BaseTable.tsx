@@ -52,18 +52,18 @@ export default function BaseTable<T extends object>({
                   {emptyMessage}
                 </td>
               </tr>
-            : data.map((row, index) => (
-                <tr key={index} className="transition hover:bg-gray-50">
+            : data.map((row, rowIndex) => (
+                <tr key={rowIndex} className="transition hover:bg-gray-50">
                   {columns.map((column) => (
                     <td
-                      key={String(column.key)}
+                      key={`${rowIndex}-${String(column.key)}`}
                       className={`border-b border-gray-100 px-6 py-5 text-sm text-black ${align(
                         column.align,
                       )}`}
                     >
                       {column.render ?
                         column.render(row)
-                      : String(row[column.key])}
+                      : String(row[column.key as keyof T] ?? "")}
                     </td>
                   ))}
                 </tr>

@@ -1,7 +1,10 @@
+// src/components/ui/tables/types.ts
 import type { ReactNode } from "react";
 
 export interface TableColumn<T> {
-  key: keyof T;
+  // keyof T tetap dapat autocomplete field asli,
+  // (string & {}) mengizinkan key custom seperti "action" tanpa melebur jadi `string` polos
+  key: keyof T | (string & {});
   header: string;
   width?: string;
   align?: "left" | "center" | "right";

@@ -5,14 +5,14 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { ArrowLeft, Plus, Trash2, Upload } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import AdminLayout from "../../components/layout/Admin/AdminLayout";
-import Button from "../../components/ui/Button";
+import AdminLayout from "../../../components/layout/Admin/AdminLayout";
+import Button from "../../../components/ui/Button";
 
-import { getTicketById, updateTicket } from "../../services/api/ticketApi";
-import { mapTicketApiToTicket } from "../../services/api/mappers/ticketAdapter";
-import { getImageUrl } from "../../utils/imageHelper";
+import { getTicketById, updateTicket } from "../../../services/api/ticketApi";
+import { mapTicketApiToTicket } from "../../../services/api/mappers/ticketAdapter";
+import { getImageUrl } from "../../../utils/imageHelper";
 
-import type { Ticket, TicketGambar } from "../../types/ticket";
+import type { Ticket, TicketGambar } from "../../../types/ticket";
 
 export default function EditTicket() {
   const navigate = useNavigate();

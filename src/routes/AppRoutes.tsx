@@ -2,16 +2,16 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import AdminLogin from "../pages/Auth/AdminLogin";
 
-import Dashboard from "../pages/Admin/Dashboard";
-import AdminTransactionList from "../pages/Admin/AdminTransactionList";
+import Dashboard from "../pages/Admin/DashboardPage/Dashboard";
+import AdminTransactionList from "../pages/Admin/TransactionPage/AdminTransactionList";
 import AdminUser from "../pages/Admin/AdminUser";
-import AdminTicket from "../pages/Admin/AdminTicket";
+import AdminTicket from "../pages/Admin/TicketPage/AdminTicket";
 import AdminContent from "../pages/Admin/AdminContent";
-import AddTicket from "../pages/Admin/AddTicket";
-import EditTicket from "../pages/Admin/EditTicket";
+import AddTicket from "../pages/Admin/TicketPage/AddTicket";
+import EditTicket from "../pages/Admin/TicketPage/EditTicket";
 
 import RoleRoutes from "./RoleRoutes";
-import EditPackageTicket from "../pages/Admin/EditPackageTiket";
+import EditPackageTicket from "../pages/Admin/TicketPage/EditPackageTiket";
 
 export default function AppRoutes() {
   return (
