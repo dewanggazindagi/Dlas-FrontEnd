@@ -1,8 +1,11 @@
-import { Navigate, useParams, useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import PublicLayout from "../../components/layout/Public/PublicLayout";
 import BackLink from "../../components/ui/BackLink";
 import Button from "../../components/ui/Button";
+import TicketThumbnail from "../../components/ui/TicketThumbnail";
 import TicketTermsBox from "../../components/cards/TicketTermsBox";
+import { useAuth } from "../../hooks/useAuth";
+import { orderStore } from "../../services/orderStore";
 import { ticketData } from "../../services/data/ticketData";
 import { packageTicketData } from "../../services/data/packageTicketData";
 import { termsData } from "../../services/data/termsData";
@@ -10,6 +13,8 @@ import { regularTicketTermsData, packageTicketTermsData } from "../../services/d
 import { formatter } from "../../utils/formatter";
 
 export default function KonfirmasiPembelianPage() {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
 
@@ -28,6 +33,25 @@ export default function KonfirmasiPembelianPage() {
   const totalPayment = item.price * quantity;
   const categoryTerms = isPackage ? packageTicketTermsData : regularTicketTermsData;
 
+  function handlePayment() {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    const newOrder = {
+      id: orderStore.generateId(),
+      type: isPackage ? ("paket" as const) : ("satuan" as const),
+      ticketId: item.id,
+      quantity,
+      visitDate: dateParam ?? new Date().toISOString(),
+      orderedAt: new Date().toISOString(),
+      paymentStatus: "paid" as const,
+    };
+    orderStore.add(newOrder);
+    navigate(`/pesanan-anda/${newOrder.id}`);
+  }
+
   return (
     <PublicLayout>
       <div className="flex w-full flex-col items-center gap-6 bg-soft-gray px-4 pt-6 pb-8 md:gap-[42px] md:px-[52px] md:pt-[26px] md:pb-[84px]">
@@ -43,9 +67,7 @@ export default function KonfirmasiPembelianPage() {
 
           <div className="flex w-full flex-col items-start rounded-2xl border border-border bg-white p-2.5">
             <div className="flex w-full items-start gap-4">
-              <div className="size-[120px] shrink-0 overflow-hidden rounded-xl border border-border bg-soft-gray">
-                <img src={item.images[0]} alt={item.name} className="size-full object-cover" />
-              </div>
+              <TicketThumbnail image={item.images[0]} alt={item.name} />
               <div className="flex flex-1 flex-col items-start justify-between gap-4 self-stretch py-1">
                 <div className="flex w-full flex-col items-start gap-1">
                   <p className="w-full text-t3 font-semibold text-black capitalize">{item.name}</p>
@@ -86,7 +108,7 @@ export default function KonfirmasiPembelianPage() {
                   </div>
                 </div>
 
-                <Button variant="primary" fullWidth>
+                <Button variant="primary" fullWidth onClick={handlePayment}>
                   Bayar Sekarang
                 </Button>
               </div>

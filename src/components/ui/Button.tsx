@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 interface Props {
   children: ReactNode;
-  variant?: "primary" | "outline" | "danger";
+  variant?: "primary" | "outline" | "outline-danger" | "danger";
   size?: "xs" | "sm" | "default" | "md" | "lg" | "xl" | "undefined";
   startIcon?: ReactNode;
   endIcon?: ReactNode;
@@ -34,6 +34,8 @@ const variantClasses = {
   primary: "bg-primary border-[1.5px] border-border-button text-white hover:bg-primary-hover",
   outline:
     "bg-white border border-border text-black drop-shadow-[2px_3px_7px_rgba(0,0,0,0.05)] hover:bg-soft-gray",
+  "outline-danger":
+    "bg-white border border-border text-danger drop-shadow-[2px_3px_7px_rgba(0,0,0,0.05)] hover:bg-danger-soft",
   danger: "bg-danger text-white hover:bg-danger-soft",
 };
 

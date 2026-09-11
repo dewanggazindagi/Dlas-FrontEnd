@@ -10,6 +10,8 @@ import QuantityStepper from "../../components/ui/QuantityStepper";
 import TicketGallery from "../../components/ui/TicketGallery";
 import NumberedPoint from "../../components/ui/NumberedPoint";
 import TicketTermsBox from "../../components/cards/TicketTermsBox";
+import InlineAuthForm from "../../components/cards/InlineAuthForm";
+import { useAuth } from "../../hooks/useAuth";
 import { ticketData } from "../../services/data/ticketData";
 import { packageTicketData } from "../../services/data/packageTicketData";
 import { termsData } from "../../services/data/termsData";
@@ -17,6 +19,7 @@ import { regularTicketTermsData, packageTicketTermsData } from "../../services/d
 import { formatter } from "../../utils/formatter";
 
 export default function DetailTiketPage() {
+  const { isAuthenticated } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [quantity, setQuantity] = useState(1);
@@ -111,53 +114,60 @@ export default function DetailTiketPage() {
                 <TicketTermsBox title="Ketentuan D'las Lembah Asri" terms={termsData} />
               </div>
 
-              <div className="flex w-full flex-col items-start gap-5 px-1.5">
-                <DateField label="Kapan anda berlibur?" date={selectedDate} onDateChange={setSelectedDate} />
+              {isAuthenticated ? (
+                <>
+                  <div className="flex w-full flex-col items-start gap-5 px-1.5">
+                    <DateField label="Kapan anda berlibur?" date={selectedDate} onDateChange={setSelectedDate} />
 
-                <div className="flex w-full items-center gap-5">
-                  <p className="flex-1 text-t4 font-medium text-black">Jumlah tiket yang dibeli</p>
-                  <QuantityStepper value={quantity} onChange={setQuantity} />
-                </div>
-
-                <div className="h-px w-full border-t border-border" />
-
-                <div className="flex w-full flex-col items-start gap-4">
-                  <div className="flex w-full items-start gap-5">
-                    <p className="flex-1 text-t4 text-dark-gray">{priceLabel}</p>
-                    <div className="flex items-center gap-5">
-                      <p className="text-t4 text-dark-gray">x{quantity}</p>
-                      <p className="text-t4 text-black">{formatter.rupiah(item.price)}</p>
+                    <div className="flex w-full items-center gap-5">
+                      <p className="flex-1 text-t4 font-medium text-black">Jumlah tiket yang dibeli</p>
+                      <QuantityStepper value={quantity} onChange={setQuantity} />
                     </div>
+
+                    <div className="h-px w-full border-t border-border" />
+
+                    <div className="flex w-full flex-col items-start gap-4">
+                      <div className="flex w-full items-start gap-5">
+                        <p className="flex-1 text-t4 text-dark-gray">{priceLabel}</p>
+                        <div className="flex items-center gap-5">
+                          <p className="text-t4 text-dark-gray">x{quantity}</p>
+                          <p className="text-t4 text-black">{formatter.rupiah(item.price)}</p>
+                        </div>
+                      </div>
+                      <div className="h-px w-full border-t border-border" />
+                      <div className="flex w-full items-start gap-5">
+                        <p className="flex-1 text-t4 text-dark-gray">Total Pembayaran</p>
+                        <p className="text-t4 font-medium text-black">{formatter.rupiah(totalPayment)}</p>
+                      </div>
+                    </div>
+
+                    <div className="h-px w-full border-t border-border" />
+
+                    <button
+                      type="button"
+                      onClick={() => setConfirmed((prev) => !prev)}
+                      className="flex w-full cursor-pointer items-center justify-center gap-2.5 text-left"
+                    >
+                      <Checkbox checked={confirmed} className="shrink-0" />
+                      <span className="flex-1">
+                        <span className="hidden text-t5 text-dark-gray md:inline">
+                          Ya, saya sudah memastikan data pesanan sudah benar & Membaca ketentuan
+                        </span>
+                        <span className="text-t5 text-dark-gray md:hidden">
+                          Klik untuk checklist jika anda sudah memastikan data pesanan sudah benar & menyetujui
+                          ketentuan
+                        </span>
+                      </span>
+                    </button>
                   </div>
-                  <div className="h-px w-full border-t border-border" />
-                  <div className="flex w-full items-start gap-5">
-                    <p className="flex-1 text-t4 text-dark-gray">Total Pembayaran</p>
-                    <p className="text-t4 font-medium text-black">{formatter.rupiah(totalPayment)}</p>
-                  </div>
-                </div>
 
-                <div className="h-px w-full border-t border-border" />
-
-                <button
-                  type="button"
-                  onClick={() => setConfirmed((prev) => !prev)}
-                  className="flex w-full cursor-pointer items-center justify-center gap-2.5 text-left"
-                >
-                  <Checkbox checked={confirmed} className="shrink-0" />
-                  <span className="flex-1">
-                    <span className="hidden text-t5 text-dark-gray md:inline">
-                      Ya, saya sudah memastikan data pesanan sudah benar & Membaca ketentuan
-                    </span>
-                    <span className="text-t5 text-dark-gray md:hidden">
-                      Klik untuk checklist jika anda sudah memastikan data pesanan sudah benar & menyetujui ketentuan
-                    </span>
-                  </span>
-                </button>
-              </div>
-
-              <Button variant="primary" fullWidth disabled={!confirmed} to={confirmationUrl}>
-                Beli Sekarang
-              </Button>
+                  <Button variant="primary" fullWidth disabled={!confirmed} to={confirmationUrl}>
+                    Beli Sekarang
+                  </Button>
+                </>
+              ) : (
+                <InlineAuthForm />
+              )}
             </div>
           </div>
         </div>

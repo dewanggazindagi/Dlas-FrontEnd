@@ -22,7 +22,9 @@ export default function TicketTabs({ activeTab, onChange, className = "" }: Prop
           type="button"
           onClick={() => onChange(tab.id)}
           className={`flex flex-1 items-center justify-center gap-2.5 rounded-full px-4 py-2.5 text-t4 ${
-            activeTab === tab.id ? "bg-soft-gray font-semibold text-black" : "cursor-pointer font-medium text-black"
+            activeTab === tab.id
+              ? "border border-border bg-soft-gray font-semibold text-black"
+              : "cursor-pointer font-medium text-black"
           }`}
         >
           {tab.label}
