@@ -2,13 +2,14 @@ import { Ticket, ReceiptText } from "lucide-react";
 
 import StatCard from "../ui/StatCard";
 import { formatter } from "../../utils/formatter";
-import { transactionTableData } from "../../services/data/transactionTableData";
+import type { TransactionTable } from "../../types/transactionTable";
 
 interface Props {
-  data: Array<typeof transactionTableData[number]>;
+  data: TransactionTable[]; // <-- WAJIB ini, bukan typeof transactionTableData
+  loading: boolean;
 }
 
-export default function AdminTransactionSummaryCard({ data }: Props) {
+export default function AdminTransactionSummaryCard({ data, loading }: Props) {
   const totalTicket = data.reduce((sum, item) => sum + item.quantity, 0);
 
   const totalTransaction = data.reduce(
@@ -30,13 +31,13 @@ export default function AdminTransactionSummaryCard({ data }: Props) {
         <StatCard
           icon={<Ticket size={24} color="#238302" />}
           title="Tiket Terjual"
-          value={formatter.number(totalTicket)}
+          value={loading ? "-" : formatter.number(totalTicket)}
         />
 
         <StatCard
           icon={<ReceiptText size={24} color="#238302" />}
           title="Total Transaksi"
-          value={formatter.rupiah(totalTransaction)}
+          value={loading ? "-" : formatter.rupiah(totalTransaction)}
         />
       </div>
     </div>

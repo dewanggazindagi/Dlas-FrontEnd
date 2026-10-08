@@ -1,10 +1,9 @@
 import type { TableColumn } from "./types";
-import type { transactionTableData } from "../../../services/data/transactionTableData";
+import type { TransactionTable } from "../../../types/transactionTable";
 import { formatter } from "../../../utils/formatter";
 import Badge from "../Badge";
 
-type Transaction = (typeof transactionTableData)[number];
-
+type Transaction = TransactionTable;
 export const getTransactionColumns = (
   onDetail: (row: Transaction) => void,
 ): TableColumn<Transaction>[] => [
@@ -58,7 +57,7 @@ export const getTransactionColumns = (
     render: (row) => formatter.date(row.orderDate),
   },
   {
-    key: "id",
+    key: "action",
     header: "",
     width: "80px",
     render: (row) => (

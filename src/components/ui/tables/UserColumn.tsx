@@ -1,9 +1,9 @@
 import { Trash2 } from "lucide-react";
 
 import type { TableColumn } from "./types";
-import type { userTableData } from "../../../services/data/userTableData";
+import type { UserTable } from "../../../types/userTable";
 
-type User = (typeof userTableData)[number];
+type User = UserTable;
 
 export const getUserColumns = (
   onDelete: (user: User) => void,
@@ -14,7 +14,7 @@ export const getUserColumns = (
     width: "100px",
   },
   {
-    key: "name",
+    key: "namaPengguna",
     header: "Nama Pengguna",
     width: "160px",
   },
@@ -24,7 +24,7 @@ export const getUserColumns = (
     width: "230px",
   },
   {
-    key: "phone",
+    key: "noHp",
     header: "No.HP",
     width: "150px",
   },
@@ -39,26 +39,15 @@ export const getUserColumns = (
     width: "160px",
   },
   {
-    key: "id",
+    key: "action", // diganti dari "id"
     header: "",
     width: "60px",
     render: (row) => (
       <button
         type="button"
         onClick={() => onDelete(row)}
-        className="
-          flex
-          h-7
-          w-7
-          items-center
-          justify-center
-          rounded-md
-          text-dark-gray
-          transition
-          hover:bg-danger-soft
-          hover:text-danger
-        "
-        aria-label={`Hapus pengguna ${row.name}`}
+        className="flex h-7 w-7 items-center justify-center rounded-md text-dark-gray transition hover:bg-danger-soft hover:text-danger"
+        aria-label={`Hapus pengguna ${row.namaPengguna}`}
       >
         <Trash2 size={18} />
       </button>

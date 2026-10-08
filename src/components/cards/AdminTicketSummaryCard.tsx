@@ -2,20 +2,30 @@ import { Ticket, FolderOpen } from "lucide-react";
 
 import StatCard from "../ui/StatCard";
 import { formatter } from "../../utils/formatter";
-import { allTicketData } from "./../../services/data/allTicketData";
+import type { Ticket as TicketType } from "../../types/ticket";
 
 interface Props {
-  data: Array<(typeof allTicketData)[number]>;
+  data: TicketType[];
+  loading?: boolean;
 }
 
-export default function AdminTicketSummaryCard({ data }: Props) {
+/**
+ * Summary card untuk menampilkan statistik tiket
+ */
+export default function AdminTicketSummaryCard({
+  data,
+  loading = false,
+}: Props) {
+  // Filter tiket paket dan satuan
   const totalPackage = data.filter(
-    (item) => item.category === "Paket Hemat",
+    (item) => item.jenisTiket === "Paket Hemat",
   ).length;
 
   const totalRegular = data.filter(
-    (item) => item.category === "Regular/Satuan",
+    (item) => item.jenisTiket === "Regular/Satuan",
   ).length;
+
+  const totalTickets = totalPackage + totalRegular;
 
   return (
     <div>
@@ -23,7 +33,7 @@ export default function AdminTicketSummaryCard({ data }: Props) {
         <h1 className="text-2xl font-semibold">Tiket Yang Tersedia</h1>
 
         <p className="mt-1.5 text-md text-dark-gray">
-          Lihat semua tiket yang terdaftar
+          {loading ? "Memuat data..." : `Total ${totalTickets} tiket terdaftar`}
         </p>
       </div>
 
@@ -31,13 +41,13 @@ export default function AdminTicketSummaryCard({ data }: Props) {
         <StatCard
           icon={<FolderOpen size={24} color="#238302" />}
           title="Jumlah tiket paket hemat"
-          value={formatter.number(totalPackage)}
+          value={loading ? "-" : formatter.number(totalPackage)}
         />
 
         <StatCard
           icon={<Ticket size={24} color="#238302" />}
           title="Jumlah tiket satuan/reguler"
-          value={formatter.number(totalRegular)}
+          value={loading ? "-" : formatter.number(totalRegular)}
         />
       </div>
     </div>

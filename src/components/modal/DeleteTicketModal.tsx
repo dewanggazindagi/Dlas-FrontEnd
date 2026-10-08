@@ -8,6 +8,7 @@ import type { Ticket } from "../../types/ticket";
 interface DeleteTicketModalProps {
   open: boolean;
   onClose: () => void;
+  loading?: boolean;
   ticket: Ticket | null;
   onConfirm: (ticket: Ticket) => void;
 }
@@ -17,6 +18,7 @@ export default function DeleteTicketModal({
   onClose,
   ticket,
   onConfirm,
+  loading = false,
 }: DeleteTicketModalProps) {
   if (!ticket) return null;
 
@@ -57,7 +59,7 @@ export default function DeleteTicketModal({
 
           {/* NAMA TIKET */}
           <p className="mt-3 px-2 text-sm font-semibold text-black">
-            "{ticket.name}"
+            "{ticket.namaTiket}"
           </p>
         </div>
 
@@ -94,7 +96,7 @@ export default function DeleteTicketModal({
               font-semibold
             "
           >
-            Ya, Hapus
+            {loading ? "Menghapus..." : "Ya, Hapus"}
           </Button>
         </div>
       </div>

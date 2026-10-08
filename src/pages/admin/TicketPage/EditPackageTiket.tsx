@@ -8,16 +8,16 @@ import { ArrowLeft, ChevronDown, Plus, Trash2, Upload } from "lucide-react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import AdminLayout from "../../components/layout/Admin/AdminLayout";
-import Button from "../../components/ui/Button";
+import AdminLayout from "../../../components/layout/Admin/AdminLayout";
+import Button from "../../../components/ui/Button";
 
-import { formatter } from "../../utils/formatter";
+import { formatter } from "../../../utils/formatter";
 
 import {
   getPackageTicketById,
   updatePackageTicket,
   getTickets,
-} from "../../services/api/ticketApi";
+} from "../../../services/api/ticketApi";
 
 // =========================================================
 // TYPE

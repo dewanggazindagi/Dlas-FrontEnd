@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+// AdminUserTable.tsx
 import { useEffect, useState } from "react";
 
 import BaseTable from "../ui/tables/BaseTable";
@@ -11,40 +13,36 @@ import DeleteUserModal from "../modal/DeleteUserModal";
 
 import usePagination from "../../hooks/usePagination";
 
-import { userTableData } from "../../services/data/userTableData";
+import type { UserTable } from "../../types/userTable";
+import { fetchUsers, deleteUser } from "../../services/api/userService";
 
 interface AdminUserTableProps {
-  data: typeof userTableData;
+  data: UserTable[];
+  loading: boolean;
 }
 
-export default function AdminUserTable({ data }: AdminUserTableProps) {
-  const [users, setUsers] = useState(data);
+export default function AdminUserTable({ data, loading }: AdminUserTableProps) {
+  const [users, setUsers] = useState<UserTable[]>(data);
+
+  useEffect(() => {
+    setUsers(data);
+  }, [data]);
+
   const [searchValue, setSearchValue] = useState("");
   const [role, setRole] = useState("all");
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-
-  const [selectedUser, setSelectedUser] = useState<
-    (typeof userTableData)[number] | null
-  >(null);
-
+  const [selectedUser, setSelectedUser] = useState<UserTable | null>(null);
   const [openAddModal, setOpenAddModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const roleOptions = [
-    {
-      label: "Semua Role/Peran",
-      value: "all",
-    },
-    {
-      label: "Loket",
-      value: "Loket",
-    },
-    {
-      label: "Pengunjung",
-      value: "Pengunjung",
-    },
+    { label: "Semua Role/Peran", value: "all" },
+    { label: "Loket", value: "Loket" },
+    { label: "Pengunjung", value: "Pengunjung" },
   ];
 
-  const handleDelete = (user: (typeof userTableData)[number]) => {
+  const handleDelete = (user: UserTable) => {
     setSelectedUser(user);
     setOpenDeleteModal(true);
   };
@@ -53,11 +51,11 @@ export default function AdminUserTable({ data }: AdminUserTableProps) {
     const keyword = searchValue.toLowerCase();
 
     return (
-      item.id.toLowerCase().includes(keyword) ||
-      item.name.toLowerCase().includes(keyword) ||
-      item.email.toLowerCase().includes(keyword) ||
-      item.phone.toLowerCase().includes(keyword) ||
-      item.role.toLowerCase().includes(keyword)
+      (item.id ?? "").toLowerCase().includes(keyword) ||
+      (item.namaPengguna ?? "").toLowerCase().includes(keyword) ||
+      (item.email ?? "").toLowerCase().includes(keyword) ||
+      (item.noHp ?? "").toLowerCase().includes(keyword) ||
+      (item.role ?? "").toLowerCase().includes(keyword)
     );
   });
 
@@ -73,23 +71,55 @@ export default function AdminUserTable({ data }: AdminUserTableProps) {
     setCurrentPage(1);
   }, [searchValue, role, setCurrentPage]);
 
-  const handleConfirmDelete = (user: (typeof userTableData)[number]) => {
-    setUsers((prev) => prev.filter((item) => item.id !== user.id));
+  const handleConfirmDelete = async (user: UserTable) => {
+    try {
+      setDeleting(true);
+      setDeleteError(null);
 
-    setOpenDeleteModal(false);
-    setSelectedUser(null);
+      await deleteUser(user.id);
 
-    setCurrentPage(1);
+      // refetch dari GET, sama seperti pola create tadi — supaya data selalu sinkron dengan backend
+      const refreshedUsers = await fetchUsers();
+      setUsers(refreshedUsers);
+
+      setOpenDeleteModal(false);
+      setSelectedUser(null);
+      setCurrentPage(1);
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ?
+          err.message
+        : "Gagal menghapus pengguna. Coba lagi.",
+      );
+    } finally {
+      setDeleting(false);
+    }
   };
 
-  const handleAddUser = (newUser: (typeof userTableData)[number]) => {
-    setUsers((prev) => [...prev, newUser]);
-
+  const handleAddUser = async () => {
+    const refreshedUsers = await fetchUsers(); // sekarang valid, sudah di-import
+    setUsers(refreshedUsers);
     setOpenAddModal(false);
     setCurrentPage(1);
   };
 
   const columns = getUserColumns(handleDelete);
+
+  if (loading) {
+    return (
+      <div className="py-10 text-center text-sm text-dark-gray">
+        Memuat data pengguna...
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="py-10 text-center text-sm text-dark-gray">
+        Belum ada tiket pada kategori ini.
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -116,18 +146,7 @@ export default function AdminUserTable({ data }: AdminUserTableProps) {
           <button
             type="button"
             onClick={() => setOpenAddModal(true)}
-            className="
-              h-11
-              rounded-full
-              bg-primary
-              px-5
-              text-sm
-              font-semibold
-              text-white
-              shadow-md
-              transition
-              hover:opacity-90
-            "
+            className="h-11 rounded-full bg-primary px-5 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
           >
             Tambah Pengguna Loket
           </button>
@@ -139,18 +158,19 @@ export default function AdminUserTable({ data }: AdminUserTableProps) {
       <DeleteUserModal
         open={openDeleteModal}
         user={selectedUser}
+        loading={deleting}
+        error={deleteError}
         onClose={() => {
           setOpenDeleteModal(false);
           setSelectedUser(null);
+          setDeleteError(null);
         }}
         onConfirm={handleConfirmDelete}
       />
 
       <AddLoketModal
         open={openAddModal}
-        onClose={() => {
-          setOpenAddModal(false);
-        }}
+        onClose={() => setOpenAddModal(false)}
         onSubmit={handleAddUser}
       />
 

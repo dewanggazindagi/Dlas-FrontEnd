@@ -1,8 +1,8 @@
 export interface UserTable {
   id: string;
-  name: string;
+  namaPengguna: string;
   email: string;
-  phone: string;
+  noHp: string;
   role: "Loket" | "Pengunjung";
   password: string;
 }

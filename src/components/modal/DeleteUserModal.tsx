@@ -9,7 +9,9 @@ interface DeleteUserModalProps {
   open: boolean;
   onClose: () => void;
   user: UserTable | null;
-  onConfirm: (user: UserTable) => void;
+  onConfirm: (user: UserTable) => void | Promise<void>;
+  loading?: boolean;
+  error?: string | null;
 }
 
 export default function DeleteUserModal({
@@ -17,6 +19,8 @@ export default function DeleteUserModal({
   onClose,
   user,
   onConfirm,
+  loading = false,
+  error = null,
 }: DeleteUserModalProps) {
   if (!user) return null;
 
@@ -55,6 +59,13 @@ export default function DeleteUserModal({
           <p className="mt-2.5 px-2 text-md leading-5 text-dark-gray">
             Jika anda hapus akun pengguna, maka tidak dapat dipulihkan kembali
           </p>
+
+          {/* NAMA TIKET */}
+          <p className="mt-3 px-2 text-sm font-semibold text-black">
+            "{user.namaPengguna}"
+          </p>
+
+          {error && <p className="mt-2.5 px-2 text-sm text-red-500">{error}</p>}
         </div>
 
         <div className="mt-8 grid grid-cols-2 gap-2">
@@ -62,6 +73,7 @@ export default function DeleteUserModal({
             type="button"
             variant="outline"
             onClick={onClose}
+            disabled={loading}
             className="
               h-9
               w-full
@@ -72,6 +84,7 @@ export default function DeleteUserModal({
               font-semibold
               shadow-sm
               hover:bg-gray-50
+              disabled:opacity-60
             "
           >
             Kembali
@@ -81,15 +94,17 @@ export default function DeleteUserModal({
             type="button"
             variant="danger"
             onClick={handleConfirm}
+            disabled={loading}
             className="
               h-9
               w-full
               rounded-full
               text-md
               font-semibold
+              disabled:opacity-60
             "
           >
-            Ya, Hapus
+            {loading ? "Menghapus..." : "Ya, Hapus"}
           </Button>
         </div>
       </div>

@@ -1,13 +1,14 @@
 import { UserRound, Users } from "lucide-react";
 import StatCard from "../ui/StatCard";
 import { formatter } from "../../utils/formatter";
-import { userTableData } from "../../services/data/userTableData";
+import { type UserTable } from "../../types/userTable";
 
 interface Props {
-  data: Array<(typeof userTableData)[number]>;
+  data: UserTable[];
+  loading: boolean;
 }
 
-export default function AdminUserCard({ data }: Props) {
+export default function AdminUserCard({ data, loading }: Props) {
   const totalLoket = data.filter((item) => item.role === "Loket").length;
 
   const totalPengunjung = data.filter(
@@ -28,13 +29,13 @@ export default function AdminUserCard({ data }: Props) {
         <StatCard
           icon={<UserRound size={24} color="#238302" />}
           title="Pengguna Loket"
-          value={formatter.number(totalLoket)}
+          value={loading ? "-" : formatter.number(totalLoket)}
         />
 
         <StatCard
           icon={<Users size={24} color="#238302" />}
           title="Pengunjung"
-          value={formatter.number(totalPengunjung)}
+          value={loading ? "-" : formatter.number(totalPengunjung)}
         />
       </div>
     </div>
