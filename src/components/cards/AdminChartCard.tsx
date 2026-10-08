@@ -1,19 +1,27 @@
 import BarChart from "../../components/charts/BarChart";
-import type { Transaction } from "../../types/transaction";
+import type { ChartData, TopTicket } from "../../types/dashboard";
+//import type { Transaction } from "../../types/transaction";
 
-import {
-  transactionToBarChart,
-  transactionToTopTicket,
-} from "../../utils/chart";
+// import {
+//   transactionToBarChart,
+//   transactionToTopTicket,
+// } from "../../utils/chart";
 
 interface Props {
-  data: Transaction[];
+  data: ChartData[];
+  topTickets: TopTicket[];
 }
 
-export default function AdminChartCard({ data }: Props) {
-  const dashboardData = transactionToBarChart(data);
+export default function AdminChartCard({ data, topTickets }: Props) {
+  const dashboardData = data.map((item) => ({
+    month: item.month || item.year || "Data", 
+    value: Number(item.totalTiket || 0)
+  }));
 
-  const topTicketData = transactionToTopTicket(data);
+  const topTicketData = topTickets.map((item) => ({
+    ticket: item.namaTiket, 
+    value: item.tiketTerjual
+  }));
 
   return (
     <div>
