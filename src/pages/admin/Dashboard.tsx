@@ -1,12 +1,10 @@
-//import { filterTransactionByPeriod } from "../../../utils/filterTransactionByPeriod";
-import { useEffect, useState } from "react";
-
-import AdminLayout from "../../../components/layout/Admin/AdminLayout";
-import AdminAnalisysCard from "../../../components/cards/AdminAnalisysCard";
-import AdminChartCard from "../../../components/cards/AdminChartCard";
-import AdminTable from "../../../components/tables/AdminTable";
-import type { DashboardSummary, ChartData, TopTicket } from "../../../types/dashboard";
-import { dashboardApi } from "../../../services/api/dashboardApi"; 
+import { useState, useEffect } from "react";
+import type { DashboardSummary, ChartData, TopTicket } from "../../types/dashboard";
+import AdminLayout from "../../components/layout/Admin/AdminLayout";
+import AdminAnalisysCard from "../../components/cards/AdminAnalisysCard";
+import AdminChartCard from "../../components/cards/AdminChartCard";
+import AdminTable from "../../components/tables/AdminTable";
+import { dashboardApi } from "../../services/api/dashboardApi"; 
 
 export default function Dashboard() {
   const [period, setPeriod] = useState("year");
