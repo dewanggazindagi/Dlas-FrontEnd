@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useMemo, useState, useEffect } from "react";
+import { createContext, useContext, useMemo, useState, useEffect, useCallback } from "react";
 
 import type { ReactNode } from "react";
 
@@ -8,6 +8,8 @@ import {
   logoutAdmin,
   type LoginPayload,
 } from "../services/api/authApi";
+import { useAutoLogout } from "../hooks/useAutoLogout";
+import IdleTimerWidget from "../components/ui/IdleTimerWidget";
 
 interface User {
   id: string;
@@ -41,14 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token && storedUser) {
       try {
         const parsedUser: User = JSON.parse(storedUser);
-
         setUser(parsedUser);
       } catch (error) {
         console.error("Gagal membaca data user:", error);
-
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
-
         setUser(null);
       }
     } else {
@@ -60,32 +59,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function login(payload: LoginPayload): Promise<User> {
     const response = await loginAdmin(payload);
-
-    console.log("LOGIN RESPONSE:", response);
-
     const token = response.accessToken;
     const user = response.user;
 
-    console.log("ACCESS TOKEN:", token);
-    console.log("USER LOGIN:", user);
-
-    if (!token) {
-      throw new Error("Access token tidak ditemukan");
-    }
-
-    if (!user) {
-      throw new Error("Data user tidak ditemukan");
+    if (!token || !user) {
+      throw new Error("Login gagal, data tidak lengkap");
     }
 
     localStorage.setItem("accessToken", token);
     localStorage.setItem("user", JSON.stringify(user));
-
     setUser(user);
 
     return user;
   }
 
-  async function logout() {
+  const logout = useCallback(async () => {
     try {
       await logoutAdmin();
     } catch (error) {
@@ -93,12 +81,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
-
       setUser(null);
 
-      window.location.href = "/admin/login";
+      if (window.location.pathname.startsWith("/pos")) {
+        window.location.href = "/pos/login";
+      } else {
+        window.location.href = "/admin/login";
+      }
     }
-  }
+  }, []);
+
+  // INTEGRASI HOOK & WIDGET POPUP
+  const { remainingSeconds } = useAutoLogout({
+    timeoutInMinutes: 15,
+    onLogout: logout,
+    isLoggedIn: !!user,
+  });
 
   const value = useMemo(
     () => ({
@@ -108,18 +106,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       checkAuth,
     }),
-    [user, loading],
+    [user, loading, logout]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      {/* RENDER POPUP TIMER DI KANAN BAWAH SAAT LOGGED IN */}
+      {user && <IdleTimerWidget remainingSeconds={remainingSeconds} />}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-
   if (!context) {
     throw new Error("useAuth harus digunakan dalam AuthProvider");
   }
-
   return context;
 }

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import TicketCard from "./TicketCard";
+=======
+import TicketCard from "../cards/TicketCard"; // Sesuaikan dengan posisi folder sebenarnya
+>>>>>>> arthur/main
 import type { Ticket } from "../../types/ticket";
 
 interface TicketListContentProps {

@@ -1,14 +1,22 @@
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import type {
   DashboardSummary,
   ChartData,
   TopTicket,
 } from "../../types/dashboard";
+=======
+import type { DashboardSummary, ChartData, TopTicket } from "../../types/dashboard";
+>>>>>>> arthur/main
 import AdminLayout from "../../components/layout/Admin/AdminLayout";
 import AdminAnalisysCard from "../../components/cards/Admin/AdminAnalisysCard";
 import AdminChartCard from "../../components/cards/Admin/AdminChartCard";
 import AdminTable from "../../components/tables/AdminTable";
+<<<<<<< HEAD
 import { dashboardApi } from "../../services/api/dashboardApi";
+=======
+import { dashboardApi } from "../../services/api/dashboardApi"; 
+>>>>>>> arthur/main
 
 export default function Dashboard() {
   const [period, setPeriod] = useState("year");
@@ -47,17 +55,22 @@ export default function Dashboard() {
   return (
     <AdminLayout>
       <div className="grid gap-7 p-10">
+<<<<<<< HEAD
         {isLoading && (
           <div className="text-center text-gray-500">
             Memuat data analitik...
           </div>
         )}
+=======
+        {isLoading && <div className="text-center text-gray-500">Memuat data analitik...</div>}
+>>>>>>> arthur/main
 
         {!isLoading && (
           <>
             <AdminAnalisysCard
               period={period}
               setPeriod={setPeriod}
+<<<<<<< HEAD
               data={summaryData}
             />
 
@@ -66,6 +79,22 @@ export default function Dashboard() {
             <AdminTable data={tableData} />
           </>
         )}
+=======
+              data={summaryData} 
+            />
+
+            <AdminChartCard 
+              data={chartData} 
+              topTickets={tableData}
+            />
+
+            <AdminTable 
+              data={tableData} 
+            />
+          </>
+        )}
+
+>>>>>>> arthur/main
       </div>
     </AdminLayout>
   );

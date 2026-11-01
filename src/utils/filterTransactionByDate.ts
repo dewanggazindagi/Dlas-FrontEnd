@@ -4,15 +4,22 @@ export function filterTransactionByDate(
   data: TransactionTable[],
   selectedDate?: Date
 ) {
-  if (!selectedDate) return data;
+  if (!selectedDate || !Array.isArray(data)) return data;
+
+  const targetYear = selectedDate.getFullYear();
+  const targetMonth = selectedDate.getMonth();
+  const targetDay = selectedDate.getDate();
 
   return data.filter((item) => {
-    const orderDate = new Date(item.orderDate);
+    if (!item.orderDate) return true;
+
+    const parsedDate = new Date(item.orderDate);
+    if (isNaN(parsedDate.getTime())) return true;
 
     return (
-      orderDate.getFullYear() === selectedDate.getFullYear() &&
-      orderDate.getMonth() === selectedDate.getMonth() &&
-      orderDate.getDate() === selectedDate.getDate()
+      parsedDate.getFullYear() === targetYear &&
+      parsedDate.getMonth() === targetMonth &&
+      parsedDate.getDate() === targetDay
     );
   });
 }
