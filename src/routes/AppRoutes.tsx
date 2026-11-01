@@ -89,15 +89,19 @@ export default function AppRoutes() {
       </Route>
 
       {/* 5. FALLBACK ROUTE (Jika URL ngawur / tidak ditemukan) */}
-      <Route path="/" element={<Navigate to="/admin/login" replace />} />
-      <Route path="*" element={<Navigate to="/admin/login" replace />} />
       <Route path="/" element={<LandingPage />} />
       <Route path="/denah" element={<DenahPage />} />
       <Route path="/tiket" element={<TiketPage />} />
       <Route path="/tiket/rekomendasi" element={<RekomendasiTiketPage />} />
-      <Route path="/tiket/hasil-rekomendasi" element={<HasilRekomendasiPage />} />
+      <Route
+        path="/tiket/hasil-rekomendasi"
+        element={<HasilRekomendasiPage />}
+      />
       <Route path="/tiket/:id" element={<DetailTiketPage />} />
-      <Route path="/tiket/:id/konfirmasi" element={<KonfirmasiPembelianPage />} />
+      <Route
+        path="/tiket/:id/konfirmasi"
+        element={<KonfirmasiPembelianPage />}
+      />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/profile" element={<ProfilePage />} />

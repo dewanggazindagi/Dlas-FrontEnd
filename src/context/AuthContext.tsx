@@ -1,112 +1,127 @@
-import { createContext, useCallback, useState, type ReactNode } from "react";
-import type { StoredAccount, User } from "../types/user";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useMemo, useState, useEffect, useCallback } from "react";
 
-const ACCOUNTS_KEY = "dlas_accounts";
-const SESSION_KEY = "dlas_session_email";
+import type { ReactNode } from "react";
 
-interface RegisterInput {
-  name: string;
+import {
+  loginAdmin,
+  logoutAdmin,
+  type LoginPayload,
+} from "../services/api/authApi";
+import { useAutoLogout } from "../hooks/useAutoLogout";
+import IdleTimerWidget from "../components/ui/IdleTimerWidget";
+
+interface User {
+  id: string;
+  name?: string;
   email: string;
-  phone: string;
-  password: string;
+  role: string;
 }
 
-interface AuthContextValue {
+interface AuthContextType {
   user: User | null;
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => { success: boolean; message?: string };
-  register: (input: RegisterInput) => { success: boolean; message?: string };
-  logout: () => void;
-  updateProfile: (input: Partial<Pick<User, "name" | "email" | "phone" | "avatar">>) => void;
-  deleteAccount: () => void;
+  loading: boolean;
+  login: (payload: LoginPayload) => Promise<User>;
+  logout: () => Promise<void>;
+  checkAuth: () => void;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-function readAccounts(): StoredAccount[] {
-  try {
-    return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) ?? "[]") as StoredAccount[];
-  } catch {
-    return [];
-  }
-}
-
-function writeAccounts(accounts: StoredAccount[]): void {
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-}
-
-function toPublicUser(account: StoredAccount): User {
-  return { name: account.name, email: account.email, phone: account.phone, avatar: account.avatar };
-}
-
-function readInitialUser(): User | null {
-  const sessionEmail = localStorage.getItem(SESSION_KEY);
-  if (!sessionEmail) return null;
-  const account = readAccounts().find((item) => item.email === sessionEmail);
-  return account ? toPublicUser(account) : null;
-}
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(readInitialUser);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = useCallback((email: string, password: string) => {
-    const account = readAccounts().find((item) => item.email.toLowerCase() === email.toLowerCase());
-    if (!account || account.password !== password) {
-      return { success: false, message: "Email atau kata sandi salah" };
-    }
-    localStorage.setItem(SESSION_KEY, account.email);
-    setUser(toPublicUser(account));
-    return { success: true };
+  useEffect(() => {
+    checkAuth();
   }, []);
 
-  const register = useCallback((input: RegisterInput) => {
-    const accounts = readAccounts();
-    if (accounts.some((item) => item.email.toLowerCase() === input.email.toLowerCase())) {
-      return { success: false, message: "Email sudah terdaftar" };
-    }
-    const newAccount: StoredAccount = { ...input };
-    writeAccounts([...accounts, newAccount]);
-    localStorage.setItem(SESSION_KEY, newAccount.email);
-    setUser(toPublicUser(newAccount));
-    return { success: true };
-  }, []);
+  function checkAuth() {
+    const token = localStorage.getItem("accessToken");
+    const storedUser = localStorage.getItem("user");
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(SESSION_KEY);
-    setUser(null);
-  }, []);
-
-  const updateProfile = useCallback((input: Partial<Pick<User, "name" | "email" | "phone" | "avatar">>) => {
-    setUser((current) => {
-      if (!current) return current;
-      const accounts = readAccounts();
-      const index = accounts.findIndex((item) => item.email === current.email);
-      if (index === -1) return current;
-      const updatedAccount: StoredAccount = { ...accounts[index], ...input };
-      accounts[index] = updatedAccount;
-      writeAccounts(accounts);
-      if (input.email && input.email !== current.email) {
-        localStorage.setItem(SESSION_KEY, input.email);
+    if (token && storedUser) {
+      try {
+        const parsedUser: User = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error("Gagal membaca data user:", error);
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("user");
+        setUser(null);
       }
-      return toPublicUser(updatedAccount);
-    });
+    } else {
+      setUser(null);
+    }
+
+    setLoading(false);
+  }
+
+  async function login(payload: LoginPayload): Promise<User> {
+    const response = await loginAdmin(payload);
+    const token = response.accessToken;
+    const user = response.user;
+
+    if (!token || !user) {
+      throw new Error("Login gagal, data tidak lengkap");
+    }
+
+    localStorage.setItem("accessToken", token);
+    localStorage.setItem("user", JSON.stringify(user));
+    setUser(user);
+
+    return user;
+  }
+
+  const logout = useCallback(async () => {
+    try {
+      await logoutAdmin();
+    } catch (error) {
+      console.error("Logout API error:", error);
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      setUser(null);
+
+      if (window.location.pathname.startsWith("/pos")) {
+        window.location.href = "/pos/login";
+      } else {
+        window.location.href = "/admin/login";
+      }
+    }
   }, []);
 
-  const deleteAccount = useCallback(() => {
-    setUser((current) => {
-      if (!current) return current;
-      writeAccounts(readAccounts().filter((item) => item.email !== current.email));
-      localStorage.removeItem(SESSION_KEY);
-      return null;
-    });
-  }, []);
+  // INTEGRASI HOOK & WIDGET POPUP
+  const { remainingSeconds } = useAutoLogout({
+    timeoutInMinutes: 15,
+    onLogout: logout,
+    isLoggedIn: !!user,
+  });
+
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      login,
+      logout,
+      checkAuth,
+    }),
+    [user, loading, logout]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{ user, isAuthenticated: Boolean(user), login, register, logout, updateProfile, deleteAccount }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
+      {/* RENDER POPUP TIMER DI KANAN BAWAH SAAT LOGGED IN */}
+      {user && <IdleTimerWidget remainingSeconds={remainingSeconds} />}
     </AuthContext.Provider>
   );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth harus digunakan dalam AuthProvider");
+  }
+  return context;
 }

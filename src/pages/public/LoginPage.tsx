@@ -49,7 +49,7 @@ export default function LoginPage() {
         {error && <p className="text-t5 text-danger">{error}</p>}
       </div>
 
-      <div className="flex w-full flex-col items-center gap-[18px]">
+      <div className="flex w-full flex-col items-center gap-4.5">
         <Button variant="primary" fullWidth disabled={!isValid} onClick={handleSubmit}>
           Masuk
         </Button>

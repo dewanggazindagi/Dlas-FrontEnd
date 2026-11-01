@@ -47,12 +47,12 @@ export default function ProfilePage() {
 
   return (
     <PublicLayout>
-      <div className="flex w-full flex-col items-center gap-6 bg-soft-gray px-4 pt-6 pb-8 md:gap-[42px] md:px-[52px] md:pt-[26px] md:pb-[84px]">
-        <div className="flex w-full max-w-[1336px] flex-col items-start">
+      <div className="flex w-full flex-col items-center gap-6 bg-soft-gray px-4 pt-6 pb-8 md:gap-10.5 md:px-13 md:pt-6.5 md:pb-21">
+        <div className="flex w-full max-w-334 flex-col items-start">
           <BackLink label="Kembali ke Beranda" to="/" />
         </div>
 
-        <div className="flex w-full max-w-[742px] flex-col items-center gap-8">
+        <div className="flex w-full max-w-185.5 flex-col items-center gap-8">
           <div className="flex flex-col items-center gap-5">
             <Avatar name={name || user.name} src={avatar} size="lg" />
             <button
