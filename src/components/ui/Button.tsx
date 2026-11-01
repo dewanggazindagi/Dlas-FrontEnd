@@ -1,60 +1,91 @@
-import type { ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { Link } from "react-router-dom";
 
-interface ButtonProps {
-  type?: "button" | "submit" | "reset";
+interface Props {
   children: ReactNode;
-  size?: "xs" | "sm" | "md" | "undefined";
-  variant?: "primary" | "outline" | "danger";
+  variant?: "primary" | "outline" | "outline-danger" | "danger";
+  size?: "xs" | "sm" | "default" | "md" | "lg" | "xl" | "undefined";
   startIcon?: ReactNode;
   endIcon?: ReactNode;
-  onClick?: () => void;
+  fullWidth?: boolean;
+  as?: "button" | "a";
+  to?: string;
+  href?: string;
+  target?: string;
+  rel?: string;
+  download?: string | boolean;
   disabled?: boolean;
   className?: string;
+  onClick?: () => void;
+  type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
 }
 
-const Button = ({
-  type = "button",
-  children,
-  size = "sm",
-  variant = "primary",
-  startIcon,
-  endIcon,
-  onClick,
-  disabled = false,
-  className = "",
-}: ButtonProps) => {
-  const sizeClasses = {
-    xs: "px-3 py-2 text-xs",
-    sm: "px-[14px] py-[9px] text-sm",
-    md: "px-5 py-3 text-base",
-    undefined: "",
-  };
-
-  const variantClasses = {
-    primary:
-      "bg-primary text-white hover:bg-primary-hover disabled:bg--primary-soft disabled:text-white",
-    outline: "border bg-white text--primary hover:bg--primary-soft",
-    danger: "bg-danger text-white hover:bg-danger-soft",
-  };
-
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={`inline-flex items-center justify-center gap-1.5 rounded-full font-medium leading-none transition-all 
-        duration-200 whitespace-nowrap
-        ${sizeClasses[size]}
-        ${variantClasses[variant]}
-        ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
-        ${className}
-      `}
-    >
-      {startIcon && startIcon}
-      {children}
-      {endIcon && endIcon}
-    </button>
-  );
+const sizeClasses = {
+  xs: "px-3 py-2 text-xs gap-1.5",
+  sm: "px-3.5 py-2.5 text-t5 gap-1.5",
+  default: "px-5 py-3 text-t4 gap-2",
+  md: "px-5 py-3 text-t4 gap-2",
+  lg: "px-5 py-3 text-t4 gap-2 h-12",
+  xl: "px-5 py-2 text-t4 gap-2.5 h-14",
+  undefined: "",
 };
 
-export default Button;
+const variantClasses = {
+  primary: "bg-primary border-[1.5px] border-border-button text-white hover:bg-primary-hover",
+  outline:
+    "bg-white border border-border text-black drop-shadow-[2px_3px_7px_rgba(0,0,0,0.05)] hover:bg-soft-gray",
+  "outline-danger":
+    "bg-white border border-border text-danger drop-shadow-[2px_3px_7px_rgba(0,0,0,0.05)] hover:bg-danger-soft",
+  danger: "bg-danger text-white hover:bg-danger-soft",
+};
+
+export default function Button({
+  children,
+  variant = "primary",
+  size = "default",
+  startIcon,
+  endIcon,
+  fullWidth = false,
+  as = "button",
+  to,
+  href,
+  target,
+  rel,
+  download,
+  disabled = false,
+  className = "",
+  onClick,
+  type = "button",
+}: Props) {
+  const classes = `inline-flex cursor-pointer items-center justify-center rounded-full font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${sizeClasses[size]} ${variantClasses[variant]} ${fullWidth ? "w-full" : ""} ${className}`;
+
+  const content = (
+    <>
+      {startIcon}
+      {children}
+      {endIcon}
+    </>
+  );
+
+  if (to && !disabled) {
+    return (
+      <Link to={to} className={classes} onClick={onClick}>
+        {content}
+      </Link>
+    );
+  }
+
+  if (as === "a" && !disabled) {
+    return (
+      <a href={href} target={target} rel={rel} download={download} className={classes} onClick={onClick}>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <button type={type} className={classes} onClick={onClick} disabled={disabled}>
+      {content}
+    </button>
+  );
+}

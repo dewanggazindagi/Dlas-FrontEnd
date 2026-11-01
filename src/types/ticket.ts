@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 /* eslint-disable @typescript-eslint/no-explicit-any */
->>>>>>> arthur/main
 /**
  * Gambar yang terkait dengan tiket
  */
@@ -19,7 +16,6 @@ export interface TicketKetentuan {
   tiketId: string;
   deskripsi: string;
   urutan: number;
-<<<<<<< HEAD
   createdAt?: string;
   updatedAt?: string;
 }
@@ -72,15 +68,9 @@ export interface Ticket {
   // Data tambahan
   ketentuan: TicketKetentuan[];
   gambar: TicketGambar[];
-
-=======
->>>>>>> arthur/main
   createdAt?: string;
   updatedAt?: string;
 }
-
-<<<<<<< HEAD
-=======
 /**
  * Interface untuk Wahana Satuan yang berada di dalam Tiket Paket
  */
@@ -112,7 +102,6 @@ export interface Ticket {
   createdAt?: string;
   updatedAt?: string;
 }
->>>>>>> arthur/main
 
 /**
  * Tipe tiket yang tersedia untuk form
@@ -152,3 +141,12 @@ export type TextField =
   | "weekendPrice"
   | "status"
   | "description";
+
+export interface Ticket {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category: "Regular/Satuan" | "Paket Hemat";
+}

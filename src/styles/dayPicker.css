@@ -1,37 +1,29 @@
-.rdp-root{
-    --rdp-accent-color:#238302;
+.rdp-root {
+  --rdp-accent-color: #238302;
+  --rdp-accent-background-color: rgba(35, 131, 2, 0.1);
+  --rdp-day-height: 40px;
+  --rdp-day-width: 40px;
+  --rdp-day_button-height: 36px;
+  --rdp-day_button-width: 36px;
+  --rdp-font-family: "Inter", sans-serif;
+  --rdp-today-color: #238302;
 }
 
-.rdp-month{
-    font-family:inherit;
+.rdp-caption_label {
+  font-weight: 600;
+  font-size: 16px;
 }
 
-.rdp-caption_label{
-    font-weight:600;
-    font-size:16px;
+.rdp-weekday {
+  font-size: 11px;
+  color: #999;
 }
 
-.rdp-day_selected{
-    background:#238302 !important;
-    color:white !important;
-    border-radius:9999px;
+.rdp-day:hover {
+  background: #eaf5e7;
+  border-radius: 9999px;
 }
 
-.rdp-day:hover{
-    background:#EAF5E7;
-    border-radius:9999px;
-}
-
-.rdp-chevron{
-    fill:#555;
-}
-
-.rdp-weekday{
-    font-size:11px;
-    color:#999;
-}
-
-.rdp-day{
-    width:36px;
-    height:36px;
+.rdp-chevron {
+  fill: #555;
 }

@@ -1,84 +1,45 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { DayPicker } from "react-day-picker";
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import "react-day-picker/dist/style.css";
-import "../../styles/dayPicker.css";
+import { id } from "react-day-picker/locale";
 
-interface DatePickerProps {
-  value: Date | undefined;
-  onChange: (date: Date | undefined) => void;
-  placeholder?: string;
+interface Props {
+  date?: Date;
+  onSelect: (date?: Date) => void;
+  children: ReactNode;
+  className?: string;
 }
 
-export default function DatePicker({
-  value,
-  onChange,
-  placeholder = "Tanggal Pesanan",
-}: DatePickerProps) {
+export default function DatePicker({ date, onSelect, children, className = "" }: Props) {
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="
-          flex items-center gap-2
-          h-11
-          px-5
-          rounded-full
-          bg-white
-          border border-border
-          shadow-md
-          hover:bg-gray-50
-        "
-      >
-        <CalendarDays size={18} />
-
-        <span className="text-sm font-semibold">
-          {value ? value.toLocaleDateString("id-ID") : placeholder}
-        </span>
-      </button>
-
+    <div ref={containerRef} className={`relative ${className}`}>
+      <div onClick={() => setOpen((prev) => !prev)}>{children}</div>
       {open && (
-        <div
-          className="
-            absolute
-            right-0
-            mt-3
-            rounded-3xl
-            bg-white
-            shadow-xl
-            border
-            border-border
-            p-4
-            z-50
-          "
-        >
+        <div className="absolute top-full left-0 z-50 mt-2 rounded-2xl border border-border bg-white p-3 shadow-card">
           <DayPicker
             mode="single"
-            animate
-            selected={value}
-            onSelect={(date) => {
-              onChange(date);
+            selected={date}
+            onSelect={(selected) => {
+              onSelect(selected);
               setOpen(false);
             }}
-            showOutsideDays={false}
-            weekStartsOn={0}
-            formatters={{
-              formatWeekdayName: (date) =>
-                date
-                  .toLocaleDateString("id-ID", {
-                    weekday: "short",
-                  })
-                  .toUpperCase()
-                  .substring(0, 3),
-            }}
-            components={{
-              Chevron: ({ orientation }) =>
-                orientation === "left" ?
-                  <ChevronLeft size={18} />
-                : <ChevronRight size={18} />,
-            }}
+            locale={id}
+            required={false}
           />
         </div>
       )}
