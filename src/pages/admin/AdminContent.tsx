@@ -1,17 +1,15 @@
+/* eslint-disable react-hooks/immutability */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/layout/Admin/AdminLayout";
-<<<<<<< HEAD
-import AdminTransactionSummaryCard from "../../components/cards/Admin/AdminTransactionSummaryCard";
-=======
 import api from "../../services/api/axios";
->>>>>>> arthur/main
 
 export default function AdminContent() {
   const navigate = useNavigate();
 
   // State Ketentuan Umum (Menggunakan LocalStorage / Dummy State agar aman & bisa CRUD)
-  const [terms, setTerms] = useState<string[]>(() => {
+  const [terms] = useState<string[]>(() => {
     const saved = localStorage.getItem("dummy_terms");
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { /* ignore */ }
@@ -97,7 +95,7 @@ export default function AdminContent() {
               {terms.length > 0 ? (
                 terms.map((term, index) => (
                   <div key={index} className="flex items-start gap-4 text-sm text-gray-700">
-                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-600 border border-gray-200">
+                    <span className="shrink-0 w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-600 border border-gray-200">
                       {String(index + 1).padStart(2, '0')}
                     </span>
                     <p className="pt-1 leading-relaxed">{term}</p>
@@ -123,7 +121,7 @@ export default function AdminContent() {
             <h2 className="text-lg font-bold text-gray-900 text-left">Denah D'las Lembah Asri</h2>
 
             <div className="flex justify-center py-2">
-              <div className="max-w-md w-full border rounded-xl overflow-hidden bg-white p-2 shadow-sm min-h-[200px] flex items-center justify-center">
+              <div className="max-w-md w-full border rounded-xl overflow-hidden bg-white p-2 shadow-sm min-h-50 flex items-center justify-center">
                 {loadingMap ? (
                   <p className="text-sm text-gray-400">Memuat denah dari database...</p>
                 ) : mapImageUrl ? (

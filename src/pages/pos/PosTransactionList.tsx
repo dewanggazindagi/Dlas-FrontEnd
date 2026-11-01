@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import axios from "axios";
 import PosLayout from "../../components/layout/Pos/PosLayout";
-import AdminTransactionSummaryCard from "../../components/cards/AdminTransactionSummaryCard";
+import AdminTransactionSummaryCard from "../../components/cards/Admin/AdminTransactionSummaryCard";
 import AdminTransactionTable from "../../components/tables/AdminTransactionTable";
 import type { TransactionTable } from "../../types/transactionTable";
 
@@ -153,13 +155,13 @@ export default function PosTransactionList() {
   return (
     <PosLayout>
       <div className="grid gap-7 p-10 pt-28">
-        <AdminTransactionSummaryCard data={transactions} />
+        <AdminTransactionSummaryCard data={transactions} loading={false} />
         {loading ? (
           <div className="text-center py-10 text-gray-500 font-medium">
             Memuat data transaksi...
           </div>
         ) : (
-          <AdminTransactionTable data={transactions} />
+          <AdminTransactionTable data={transactions} loading={false} />
         )}
       </div>
     </PosLayout>

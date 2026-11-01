@@ -1,10 +1,6 @@
 // AdminTransactionList.tsx
 import AdminLayout from "../../../components/layout/Admin/AdminLayout";
-<<<<<<< HEAD
 import AdminTransactionSummaryCard from "../../../components/cards/Admin/AdminTransactionSummaryCard";
-=======
-import AdminTransactionSummaryCard from "../../../components/cards/AdminTransactionSummaryCard";
->>>>>>> arthur/main
 import AdminTransactionTable from "../../../components/tables/AdminTransactionTable";
 import useTransactions from "../../../hooks/useTransactions";
 
@@ -27,8 +23,4 @@ export default function AdminTransactionList() {
       </div>
     </AdminLayout>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> arthur/main

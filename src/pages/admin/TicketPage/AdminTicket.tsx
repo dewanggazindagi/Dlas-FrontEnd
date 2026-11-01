@@ -1,11 +1,6 @@
 import AdminLayout from "../../../components/layout/Admin/AdminLayout";
-<<<<<<< HEAD
 import AdminTicketSummaryCard from "../../../components/cards/Admin/AdminTicketSummaryCard";
 import AdminTicketList from "../../../components/cards/Admin/AdminTicketList";
-=======
-import AdminTicketSummaryCard from "../../../components/cards/AdminTicketSummaryCard";
-import AdminTicketList from "../../../components/cards/AdminTicketList";
->>>>>>> arthur/main
 
 import { useTicketsData } from "../../../hooks/useTicketsData";
 
