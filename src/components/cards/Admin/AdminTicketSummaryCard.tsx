@@ -1,8 +1,8 @@
 import { Ticket, FolderOpen } from "lucide-react";
 
-import StatCard from "../ui/StatCard";
-import { formatter } from "../../utils/formatter";
-import type { Ticket as TicketType } from "../../types/ticket";
+import StatCard from "../../ui/StatCard";
+import { formatter } from "../../../utils/formatter";
+import type { Ticket as TicketType } from "../../../types/ticket";
 
 interface Props {
   data: TicketType[];

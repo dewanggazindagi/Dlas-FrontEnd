@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Gambar yang terkait dengan tiket
  */
@@ -36,21 +35,43 @@ export interface WahanaSatuanInPackage {
   updatedAt?: string;
 }
 
+
 export interface Ticket {
   id: string;
+
+  // Data tiket untuk tampilan
+  name: string;
+  category: string;
+  isActive: boolean;
+  price: string | number;
+
+  // Data tiket dari backend
   namaTiket: string;
   hargaWeekdays: string | number;
   hargaWeekend: string | number;
   deskripsi: string;
   status: string;
-  jenisTiket: "SATUAN" | "PAKET" | "Paket Hemat" | "Regular/Satuan" | string;
-  wahanaIds?: string[]; 
-  wahanaSatuan?: any[]; // Tambahkan baris ini untuk menampung relasi dari backend
-  ketentuan: TicketKetentuan[]; 
+
+  jenisTiket:
+    | "SATUAN"
+    | "PAKET"
+    | "Paket Hemat"
+    | "Regular/Satuan"
+    | string;
+
+  // Relasi paket
+  items?: string[];
+  wahanaIds?: string[];
+  wahanaSatuan?: WahanaSatuanInPackage[];
+
+  // Data tambahan
+  ketentuan: TicketKetentuan[];
   gambar: TicketGambar[];
+
   createdAt?: string;
   updatedAt?: string;
 }
+
 
 /**
  * Tipe tiket yang tersedia untuk form

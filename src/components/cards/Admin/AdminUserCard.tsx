@@ -1,7 +1,7 @@
 import { UserRound, Users } from "lucide-react";
-import StatCard from "../ui/StatCard";
-import { formatter } from "../../utils/formatter";
-import { type UserTable } from "../../types/userTable";
+import StatCard from "../../ui/StatCard";
+import { formatter } from "../../../utils/formatter";
+import { type UserTable } from "../../../types/userTable";
 
 interface Props {
   data: UserTable[];

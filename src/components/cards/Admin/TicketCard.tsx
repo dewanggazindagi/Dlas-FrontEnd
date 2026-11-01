@@ -1,7 +1,7 @@
-import { formatter } from "../../utils/formatter";
-import { getImageUrl } from "../../utils/imageUrl";
-import Button from "../ui/Button";
-import type { Ticket } from "../../types/ticket";
+import { formatter } from "../../../utils/formatter";
+import { getImageUrl } from "../../../utils/imageUrl";
+import Button from "../../ui/Button";
+import type { Ticket } from "../../../types/ticket";
 
 interface TicketCardProps {
   ticket: Ticket;
@@ -71,7 +71,7 @@ export default function TicketCard({
             <img
               src={imageUrl}
               alt={ticket.name}
-              className="h-full w-full object-cover"
+              className="block h-full w-full object-cover"
               onError={(event) => {
                 console.error("GAGAL LOAD GAMBAR:", imageUrl);
                 event.currentTarget.onerror = null;
@@ -100,7 +100,7 @@ export default function TicketCard({
 
           <div className="mt-2 flex items-center">
             <span className="text-md font-medium text-black">
-              {formatter.rupiah(ticket.price)}
+              {formatter.rupiah(Number(ticket.price) || 0)}
             </span>
 
             <span className="ml-1 text-xs text-dark-gray">/tiket</span>

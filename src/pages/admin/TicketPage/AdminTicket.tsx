@@ -1,6 +1,6 @@
 import AdminLayout from "../../../components/layout/Admin/AdminLayout";
-import AdminTicketSummaryCard from "../../../components/cards/AdminTicketSummaryCard";
-import AdminTicketList from "../../../components/cards/AdminTicketList";
+import AdminTicketSummaryCard from "../../../components/cards/Admin/AdminTicketSummaryCard";
+import AdminTicketList from "../../../components/cards/Admin/AdminTicketList";
 
 import { useTicketsData } from "../../../hooks/useTicketsData";
 

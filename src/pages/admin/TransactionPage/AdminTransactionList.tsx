@@ -1,6 +1,6 @@
 // AdminTransactionList.tsx
 import AdminLayout from "../../../components/layout/Admin/AdminLayout";
-import AdminTransactionSummaryCard from "../../../components/cards/AdminTransactionSummaryCard";
+import AdminTransactionSummaryCard from "../../../components/cards/Admin/AdminTransactionSummaryCard";
 import AdminTransactionTable from "../../../components/tables/AdminTransactionTable";
 import useTransactions from "../../../hooks/useTransactions";
 

@@ -1,8 +1,8 @@
 import { Ticket, ReceiptText } from "lucide-react";
 
-import StatCard from "../ui/StatCard";
-import { formatter } from "../../utils/formatter";
-import type { TransactionTable } from "../../types/transactionTable";
+import StatCard from "../../ui/StatCard";
+import { formatter } from "../../../utils/formatter";
+import type { TransactionTable } from "../../../types/transactionTable";
 
 interface Props {
   data: TransactionTable[]; // <-- WAJIB ini, bukan typeof transactionTableData

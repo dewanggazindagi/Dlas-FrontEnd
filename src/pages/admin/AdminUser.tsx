@@ -1,6 +1,6 @@
 // AdminUser.tsx
 import AdminLayout from "../../components/layout/Admin/AdminLayout";
-import AdminUserCard from "../../components/cards/AdminUserCard";
+import AdminUserCard from "../../components/cards/Admin/AdminUserCard";
 import AdminUserTable from "../../components/tables/AdminUserTable";
 import useUsers from "../../hooks/useUsers";
 

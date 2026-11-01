@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate } from "react-router-dom";
-import DeleteTicketModal from "../modal/DeleteTicketModal";
+import DeleteTicketModal from "../../modal/DeleteTicketModal";
 
-import { useTicketManagement } from "../../hooks/useTicketManagement";
-import { useCategoryFilter } from "../../hooks/useCategoryFilter";
-import { useDeleteModal } from "../../hooks/useDeleteModal";
+import { useTicketManagement } from "../../../hooks/useTicketManagement";
+import { useCategoryFilter } from "../../../hooks/useCategoryFilter";
+import { useDeleteModal } from "../../../hooks/useDeleteModal";
 
-import TicketListHeader from "../ticket/TicketListHeader";
-import TicketListContent from "../ticket/TicketListContent";
+import TicketListHeader from "../../ticket/TicketListHeader";
+import TicketListContent from "../../ticket/TicketListContent";
 
 /**
  * Component untuk menampilkan list tiket dengan filter kategori

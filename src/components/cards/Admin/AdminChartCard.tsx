@@ -1,5 +1,5 @@
-import BarChart from "../../components/charts/BarChart";
-import type { ChartData, TopTicket } from "../../types/dashboard";
+import BarChart from "../../charts/BarChart";
+import type { ChartData, TopTicket } from "../../../types/dashboard";
 //import type { Transaction } from "../../types/transaction";
 
 // import {
@@ -14,13 +14,13 @@ interface Props {
 
 export default function AdminChartCard({ data, topTickets }: Props) {
   const dashboardData = data.map((item) => ({
-    month: item.month || item.year || "Data", 
-    value: Number(item.totalTiket || 0)
+    month: item.month || item.year || "Data",
+    value: Number(item.totalTiket || 0),
   }));
 
   const topTicketData = topTickets.map((item) => ({
-    ticket: item.namaTiket, 
-    value: item.tiketTerjual
+    ticket: item.namaTiket,
+    value: item.tiketTerjual,
   }));
 
   return (
